@@ -1,8 +1,10 @@
 // auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UserService } from 'src/user/user.service';
+import { jwtConstants } from 'src/libs/constants/auth.constant';
+import { AuthResponse, LoginDto, TokenPayload } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -11,27 +13,80 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, password: string) {
-    const user = await this.usersService.findOneByUsername(username);
-    if (user && bcrypt.compareSync(password, user.password)) {
-      return user;
+  // async validateUser(username: string, password: string) {
+  //   const user = await this.usersService.findOneByUsername(username);
+  //   if (user && bcrypt.compareSync(password, user.password)) {
+  //     return user;
+  //   }
+  //   return null;
+  // }
+
+  async validateUser(username: string): Promise<any> {
+    try {
+      if (!username) {
+        return null
+      }
+      const user = await this.usersService.findOneByUsername(username);
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+      const { userId,createDate} =user
+      return { userId,username,createDate};
+    } catch (err) {
+      return null;
+    }
+  }
+
+  async login(payload: LoginDto): Promise<AuthResponse> {
+
+    const user = await this.usersService.findOneByUsername(payload.username);
+    if (!user) {
+      throw new UnauthorizedException('Username is incorrect or inactive');
+    }
+    const passwordMatches = await bcrypt.compareSync(payload.password, user.password)
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Password is incorrect or inactive');
+    }
+    if (user) {
+      const accessToken = this.getAccessToken(payload.username);
+      const refreshToken = this.getRefreshToken(payload.username);
+      const { email, role, phone, address, username} = user;
+      const authUser = {
+        email,
+        role,
+        username,
+        phone,
+        address
+      }
+      const token = {
+        access_Token:accessToken,
+        refresh_Token: refreshToken
+      }
+      return {
+        authUser,
+        token
+      };
     }
     return null;
   }
 
-  async validateUserById(userId: number): Promise<any> {
-    const user = await this.usersService.getUserById(userId);
+  async getAuthUserInfo(userId: string): Promise<any> {
+    const user = await this.usersService.findUserById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new BadRequestException('Username is incorrect or inactive');
     }
-    return user;
-  }
-
-  async login(user: any) {
-    const payload = { user };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    if (user) {
+      const usrName = user.username;
+      const { email, role, phone } = user;
+      const authUser = {
+        email,
+        role,
+        usrName,
+        phone
+      }
+      return authUser;
+    }
+    return null;
   }
 
   async getUserFromToken(token: string) {
@@ -42,4 +97,24 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
   }
+
+  getAccessToken(username: string) {
+    const payload: TokenPayload = { username };
+    const accessToken = this.jwtService.sign(payload, {
+      secret: jwtConstants.secret,
+      expiresIn: '30m',
+    });
+    return accessToken;
+  }
+
+  getRefreshToken(username: string) {
+    const payload: TokenPayload = { username };
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: jwtConstants.secret,
+      expiresIn: '7d',
+    });
+    return refreshToken;
+  }
+
+
 }

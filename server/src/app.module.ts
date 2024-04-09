@@ -7,18 +7,23 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { MulterModule } from '@nestjs/platform-express';
+import {config } from 'dotenv'
 import { OrderModule } from './order/order.module';
 import { OrderItemModule } from './order-item/order-item.module';
+import { JwtTokenStrategy } from './auth/stategy/jwt.straegy';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 
+config();
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'thinh251198',
-      database: 'postgres',
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       synchronize: true, 
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/migration/**/*.{ts,js}']
@@ -27,9 +32,15 @@ import { OrderItemModule } from './order-item/order-item.module';
     AuthModule,
     ProductModule,
     OrderModule,
-    OrderItemModule
+    OrderItemModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

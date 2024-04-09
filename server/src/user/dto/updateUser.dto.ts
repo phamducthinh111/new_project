@@ -1,28 +1,21 @@
 
-import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UpdateUserDto {
-//   @IsString()
-//   @IsNotEmpty()
-//   readonly username: String;
-
-//   @IsEmail()
-//   @IsNotEmpty()
-//   readonly email: String;
 
   @IsString()
-  @IsNotEmpty()
-  readonly password: String;
+  @IsOptional()
+  readonly password: string;
 
   @IsString()
-  @IsNotEmpty()
-  readonly phone: String;
+  @IsOptional()
+  readonly phone: string;
 
   @IsString()
-  @IsNotEmpty()
-  readonly address: String;
+  @IsOptional()
+  readonly address: string;
 
   @IsString()
-  @IsNotEmpty()
-  readonly isAdmin: String;
+  @IsOptional()
+  readonly role: string;
 };

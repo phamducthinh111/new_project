@@ -1,11 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Order } from "./order.entity";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { Model } from "./model.entity";
 
 @Entity('users')
-export class User extends Model {
+export class Employee extends Model {
     @PrimaryGeneratedColumn({ name : 'id'})
-    userId: number;
+    emlId: number;
 
     @Column({ name: 'username' })
     username: string;
@@ -24,7 +23,4 @@ export class User extends Model {
 
     @Column({ name: 'role' })
     role: string;
-
-    @OneToMany(type => Order, order => order.user) 
-    orders: Order[];
 }
