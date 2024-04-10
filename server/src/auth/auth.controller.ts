@@ -47,17 +47,17 @@ export class AuthController {
   }
 
 
-  @Public()
-  @Post('token')
-  @UseGuards(RefreshAuthGuard)
-  async refreshToken(
-    @CurrentUser('userId') userId,
-  ): Promise<ResponseObject<any>> {
-    const authUser = await this.authService.getAuthUserInfo(userId);
-    const token = this.authService.getAccessToken(userId);
-    return ResponseObject.success({
-      authUser,
-      token,
-    });
-  }
+  // @Public()
+  // @Post('token')
+  // @UseGuards(RefreshAuthGuard)
+  // async refreshToken(
+  //   @CurrentUser('userId') userId,
+  // ): Promise<ResponseObject<any>> {
+  //   const authUser = await this.authService.getAuthUserInfo(userId);
+  //   const token = this.authService.getAccessToken(userId);
+  //   return ResponseObject.success({
+  //     authUser,
+  //     token,
+  //   });
+  // }
 }

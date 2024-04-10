@@ -13,15 +13,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/createUser.dto';
 import { Response, Request } from 'express';
 import { ResponseObject } from 'src/libs/response-object';
 import { SERVER_ERROR_MESSAGE } from 'src/libs/constants';
-import { UpdateUserDto } from './dto/updateUser.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from 'src/libs/decorators/current-user.decorator';
 import { Public } from 'src/libs/decorators/public.decorators';
 import { User } from 'src/entity';
+import { Roles } from 'src/libs/decorators/roles.decorator';
+import { Role } from 'src/libs/decorators/role.enum';
+import { RolesGuard } from 'src/libs/decorators/guard/roles.guard';
+import { CreateUserDto, UpdateRoleDto, UpdateUserDto } from './dto';
 
 @Controller('users')
 export class UserControler {
@@ -65,8 +66,8 @@ export class UserControler {
   @UsePipes(ValidationPipe)
   async createEmloyess(
     @CurrentUser('userId') currentUserId,
-    @Body() createEmloyess : CreateUserDto,
-    @Res() res: Response
+    @Body() createEmloyess: CreateUserDto,
+    @Res() res: Response,
   ) {
     try {
       const isUsernameUnique = await this.userService.isUsernameUnique(
@@ -86,22 +87,10 @@ export class UserControler {
           .status(HttpStatus.BAD_REQUEST)
           .send(ResponseObject.fail('Email already exists'));
       }
-      const result = await this.userService.createEmloyess(createEmloyess,currentUserId);
-      return res.send(ResponseObject.success(result));
-
-    } catch (error) {
-      console.log(error);
-      return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
-    }
-  }
-
-
-  @Get()
-  async getAllUsers(@Res() res: Response) {
-    try {
-      const result = await this.userService.getAllUsers();
+      const result = await this.userService.createEmloyess(
+        createEmloyess,
+        currentUserId,
+      );
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
@@ -112,7 +101,7 @@ export class UserControler {
   }
 
   @Get(':userId')
-  async getUserById(@Res() res: Response, @Param('userId') userId: any) {
+  async getUserById(@Res() res: Response, @Param('userId') userId: number) {
     try {
       const result = await this.userService.getUserById(userId);
       if (!result) {
@@ -133,12 +122,12 @@ export class UserControler {
   async updateUserById(
     @Res() res: Response,
     @Body() updateUserDto: UpdateUserDto,
-    @CurrentUser('userId') currentIdUser,
+    @CurrentUser('userId') currentUserId,
   ) {
     try {
       const result = await this.userService.updateUserById(
         updateUserDto,
-        currentIdUser
+        currentUserId,
       );
       if (!result) {
         return res
@@ -154,11 +143,39 @@ export class UserControler {
     }
   }
 
-  @Delete(':userId')
-  async deletedUser(@Res() res: Response, @Param('userId') userId: any) {
+  //manager, admin, employess
+  @Get()
+  async getAllUsers(@Res() res: Response) {
     try {
-      await this.userService.deleteUser(userId);
-      return res.send(ResponseObject.success('User delted successfully'));
+      const result = await this.userService.getAllUsers();
+      if (!result) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send(ResponseObject.fail('User not found'));
+      }
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+    }
+  }
+  // manager ,admin
+  @Delete('/remove/:userId')
+  async removeUser(
+    @Res() res: Response,
+    @Param('userId') userId: number,
+    @CurrentUser('userId') currentUserId,
+  ) {
+    try {
+      const result = await this.userService.removeUser(userId, currentUserId);
+      if (!result) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send(ResponseObject.fail('User not found'));
+      }
+      return res.send(ResponseObject.success('User remove successfully'));
     } catch (error) {
       console.log(error);
       return res
@@ -167,11 +184,73 @@ export class UserControler {
     }
   }
 
-  @Get('/test')
-  async testRouter (
-    @CurrentUser('userId') userId,
+  //admin
+  @Delete('delete/:userId')
+  async deleteUserByAdmin(
+    @Res() res: Response,
+    @Param('userId') userId: number,
+    @CurrentUser('userId') currentUserId,
   ) {
-    console.log(userId)
-    return userId
+    try {
+      const result = await this.userService.deleteUserByAdmin(
+        userId,
+        currentUserId,
+      );
+      if (!result) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send(ResponseObject.fail('User not found'));
+      }
+      return res.send(ResponseObject.success('User deleted successfully'));
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+    }
+  }
+
+  @Get('remove')
+  async getAllRemoveUser(
+    @Res() res: Response,
+    @CurrentUser('userId') currentUserId,
+  ) {
+    try{
+      const result = await this.userService.getAllRemoveUser(currentUserId);
+      if (!result) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send(ResponseObject.fail('User not found'));
+      }
+      return  res.send(ResponseObject.success(result))
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+    }
+  }
+  
+  @Put('update/role/:userId')
+  async updateRoleByAdmin(
+    @Res() res: Response,
+    @Param('userId') userId: number,
+    @CurrentUser('userId') currentUserId,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ) {
+    try{
+      const result = await this.userService.updateRoleByAdmin(userId, currentUserId,updateRoleDto);
+      if (!result) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send(ResponseObject.fail('User not found'));
+      }
+      return  res.send(ResponseObject.success(result))
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+    }
   }
 }

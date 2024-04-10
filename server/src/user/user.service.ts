@@ -2,10 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/createUser.dto';
 import * as bcrypt from 'bcryptjs';
-import { UpdateUserDto } from './dto/updateUser.dto';
 import { Role } from 'src/libs/decorators/role.enum';
+import { CreateUserDto, UpdateRoleDto, UpdateUserDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -14,14 +13,14 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async isUsernameUnique(username: any): Promise<boolean> {
+  async isUsernameUnique(username: string): Promise<boolean> {
     const existingUser = await this.userRepository.findOne({
       where: { username },
     });
     return !existingUser;
   }
 
-  async isEmailUnique(email: any): Promise<boolean> {
+  async isEmailUnique(email: string): Promise<boolean> {
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
@@ -41,14 +40,28 @@ export class UserService {
     newUser.createUser = createUserDto.username;
     newUser.updateDate = new Date();
     newUser.updateUser = createUserDto.username;
-    newUser.role = Role.employess;
+    newUser.role = Role.user;
     this.userRepository.insert(newUser);
 
     return newUser;
   }
 
-  async createEmloyess(createEmloyess: CreateUserDto, currentUserId: any) {
-    const user = await this.userRepository.findOne({ where: {userId: currentUserId } });
+  async findOneByUsername(username: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { username, delFlag: false } });
+  }
+
+  async getUserById(userId: number) {
+    return await this.userRepository.findOne({
+      where: { userId, delFlag: false },
+      relations: ['orders'],
+    });
+  }
+
+  //admin, manager
+  async createEmloyess(createEmloyess: CreateUserDto, currentUserId: number) {
+    const user = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
 
     const newUser = new User();
     const hashedPassword = await bcrypt.hash(createEmloyess.password, 10);
@@ -61,34 +74,25 @@ export class UserService {
     newUser.createUser = user.username;
     newUser.updateDate = new Date();
     newUser.updateUser = user.username;
-    newUser.role = createEmloyess.role 
+    newUser.role = createEmloyess.role;
     this.userRepository.insert(newUser);
 
     return newUser;
   }
 
-  
-  async getAllUsers() {
+  async getAllUsers(): Promise<any> {
     return await this.userRepository.find({
+      where: { delFlag: false },
       relations: ['orders'],
     });
   }
 
-  async getUserById(userId: any) {
-    return await this.userRepository.findOne({
-      where: { userId },
-      relations: ['orders'],
+  async updateUserById(updateUserDto: UpdateUserDto, currentUserId: number) {
+    const findUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
     });
-  }
-
-  async findUserById(username: string) {
-    return this.userRepository.findOneBy({ username, delFlag: false });
-  }
-
-  async updateUserById( updateUserDto: UpdateUserDto, currentIdUser:any) {
-    const findUser = await this.userRepository.findOne({ where: { userId: currentIdUser} });
     if (!findUser) {
-      throw new NotFoundException(`User with id ${currentIdUser} not found`);
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
     if (updateUserDto.password) {
       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
@@ -100,30 +104,74 @@ export class UserService {
     findUser.address = updateUserDto.address ?? findUser.address;
     findUser.updateDate = new Date();
     findUser.updateUser = findUser.username;
-    findUser.role = updateUserDto.role ?? findUser.role
+    findUser.role = updateUserDto.role ?? findUser.role;
 
-    const result = await this.userRepository.update(currentIdUser, findUser);
+    const result = await this.userRepository.update(currentUserId, findUser);
     return result;
   }
 
-  async deleteUser(userId: any) {
+  async removeUser(userId: number, currentUserId: number) {
+    const findUser = await this.userRepository.findOne({ where: { userId } });
+    const findCurrenUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    if (
+      findCurrenUser.role === Role.admin || findCurrenUser.role === Role.manager
+    ) {
+      findUser.delFlag = true;
+      findUser.updateUser = findCurrenUser.username;
+      findUser.updateDate = new Date();
+      return await this.userRepository.update(userId, findUser);
+    }
+    throw new NotFoundException(`Account doesn't have permission to delete`);
+  }
+
+  //admin
+  async deleteUserByAdmin(userId: number, currentUserId: number) {
+    const findUser = await this.userRepository.findOne({ where: { userId } });
+    const findCurrenUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    if (findCurrenUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to delete`);
+    }
+    return await this.userRepository.delete(userId);
+  }
+
+  async getAllRemoveUser(currentUserId: number) {
+    const findCurrenUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
+    if(findCurrenUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to delete`); 
+    }
+    return await this.userRepository.find({
+      where: {delFlag:true},
+    })
+  }
+
+  async updateRoleByAdmin(userId: number, currentUserId:number, updateRoleDto:UpdateRoleDto) {
     const findUser = await this.userRepository.findOne({ where: { userId } });
     if (!findUser) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
-    await this.userRepository.remove(findUser);
-  }
-
-  async deleteUserByAdmin(userId: any) {
-    const findUser = await this.userRepository.findOne({ where: { userId } });
-    if (!findUser) {
-      throw new NotFoundException(`User with id ${userId} not found`);
+    const findCurrenUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
+    if(findCurrenUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to update Role`); 
     }
-    await this.userRepository.remove(findUser);
-  }
-
-  async findOneByUsername(username: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { username, delFlag: false } });
+    findUser.role = updateRoleDto.role ?? findUser.role;
+    findUser.updateUser = findCurrenUser.username;
+    findUser.updateDate = new Date();
+    const result = await this.userRepository.update(userId, findUser) 
+    return result;
   }
 
 }

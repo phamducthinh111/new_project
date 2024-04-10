@@ -47,9 +47,10 @@ export class AuthService {
     if (!passwordMatches) {
       throw new UnauthorizedException('Password is incorrect or inactive');
     }
+
     if (user) {
-      const accessToken = this.getAccessToken(payload.username);
-      const refreshToken = this.getRefreshToken(payload.username);
+      const accessToken = this.getAccessToken(user.username, user.role);
+      const refreshToken = this.getRefreshToken(user.username, user.role);
       const { email, role, phone, address, username} = user;
       const authUser = {
         email,
@@ -71,7 +72,7 @@ export class AuthService {
   }
 
   async getAuthUserInfo(userId: string): Promise<any> {
-    const user = await this.usersService.findUserById(userId);
+    const user = await this.usersService.findOneByUsername(userId);
     if (!user) {
       throw new BadRequestException('Username is incorrect or inactive');
     }
@@ -98,8 +99,8 @@ export class AuthService {
     }
   }
 
-  getAccessToken(username: string) {
-    const payload: TokenPayload = { username };
+  getAccessToken(username: string, role: string) {
+    const payload: TokenPayload = { username, role };
     const accessToken = this.jwtService.sign(payload, {
       secret: jwtConstants.secret,
       expiresIn: '30m',
@@ -107,8 +108,8 @@ export class AuthService {
     return accessToken;
   }
 
-  getRefreshToken(username: string) {
-    const payload: TokenPayload = { username };
+  getRefreshToken(username: string, role: string) {
+    const payload: TokenPayload = { username, role };
     const refreshToken = this.jwtService.sign(payload, {
       secret: jwtConstants.secret,
       expiresIn: '7d',
