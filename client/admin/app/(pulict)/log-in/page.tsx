@@ -1,28 +1,41 @@
 "use client";
 
-import axiosClient from '@/configs/AxiosClient';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Form, Input, Button } from 'antd';
-import axios from 'axios';
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { Form, Input, Button } from "antd";
+import axios from "axios";
+import Link from "next/link";
 // import 'antd/dist/antd.css'; // Import CSS của Ant Design
-import { useState } from 'react';
+import { useState } from "react";
+import { useMutation } from "react-query";
+import { LoginForm, login } from "./_components/login.fetcher";
+import { useRouter } from "next/navigation";
+import { useAppContetxt } from "@/app/AppProvider";
 
 const Login = () => {
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const {setSessionToken} = useAppContetxt();
+  const [isloadingConfỉm, setIsloadingConfỉm] = useState(false);
+  const { mutate, isLoading, isError, error, data } = useMutation(login, {
+    onSuccess: async (newData) => {
+      setIsloadingConfỉm(false);
+      const response = await fetch("api/auth", {
+        method: "POST",
+        body: JSON.stringify(newData.token),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setSessionToken(newData.token.access_Token)
 
-  const onFinish = async (values:any) => {
-    setLoading(true);
-    axiosClient.post('/auth/login',values)
-    .then(response => {
-      console.log('Response:', response.data);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-    setTimeout(() => {
-      // Simulate login process
-      setLoading(false);
-    }, 2000);
+      router.push('/dashboard')
+    },
+    onError: () => {
+      setIsloadingConfỉm(false);
+    },
+  });
+  const onFinish = (values: LoginForm) => {
+    setIsloadingConfỉm(true);
+    mutate(values);
   };
 
   return (
@@ -37,13 +50,16 @@ const Login = () => {
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: 'Please input your Username!' }]}
+            rules={[{ required: true, message: "Please input your Username!" }]}
           >
-            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Username"
+            />
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: 'Please input your Password!' }]}
+            rules={[{ required: true, message: "Please input your Password!" }]}
           >
             <Input
               prefix={<LockOutlined className="site-form-item-icon" />}
@@ -52,10 +68,23 @@ const Login = () => {
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full" loading={loading}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="w-full"
+              loading={isloadingConfỉm}
+            >
               Log in
             </Button>
           </Form.Item>
+          <div className="text-center ">
+            <p>
+              Don't have an account?{" "}
+              <Link className="text-blue-700" href="/register">
+                Register now!
+              </Link>
+            </p>
+          </div>
         </Form>
       </div>
     </div>

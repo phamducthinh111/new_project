@@ -1,3 +1,5 @@
+"use client";
+
 import { Layout } from "antd";
 import { PropsWithChildren } from "react";
 import SideBar from "./sidebar/sidebar";
