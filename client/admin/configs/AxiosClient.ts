@@ -1,99 +1,60 @@
 import axios, { AxiosError } from 'axios';
-import Cookies from 'js-cookie';
-// import { URLPrefixEnum } from '@/constants/url.constant';
-// import { handleSignOut } from '@/utils';
-
-// const updateRefreshToken = async () => {
-//   const refreshToken = Cookies.get('refreshToken');
-//   try {
-//     const res = await axios.post<{
-//       data: { result: { accessToken: string } };
-//     }>(URLPrefixEnum.REFRESH, undefined, {
-//       baseURL: process.env.NEXT_PUBLIC_WAP_ENDPOINT,
-//       headers: {
-//         'Content-Type': 'application/json',
-//         ...(refreshToken && { Authorization: `Bearer ${refreshToken}` })
-//       }
-//     });
-//     cookies.set('accessToken', res.data.data.result.accessToken);
-
-//     return res.data.data.result.accessToken;
-//   } catch (err) {
-//     handleSignOut();
-//   }
-// };
 
 const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_WAP_ENDPOINT,
+  baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-axiosClient.interceptors.request.use(
-  async (value) => {
-    const accessToken = Cookies.get('accessToken');
-    if (accessToken) {
-      value.headers.set('Authorization', `Bearer ${accessToken}`);
-    }
+// Xử lý lỗi từ phản hồi AxiosError
+const handleAxiosError = (error: AxiosError) => {
+  console.error('Error:', error);
+  throw error;
+};
 
-    return value;
-  },
-  (error) => {
-    return Promise.reject(error);
+// Thêm token vào header nếu cần thiết
+const addTokenToHeaders = (headers: any, token?: string) => {
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
-);
+  return headers;
+};
 
-// axiosClient.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalConfig = error.config;
-//     if (error?.response?.status === 401) {
-//       if (
-//         error.response.href === URLPrefixEnum.REFRESH ||
-//         !Cookies.get('refreshToken')
-//       ) {
-//         handleSignOut();
+// Hàm tổng quát cho các phương thức HTTP
+const sendRequest = async (method: string, url: string, data?: any, tokenNeeded: boolean = true, token?: string) => {
+  const headers = tokenNeeded ? addTokenToHeaders({}, token) : {};
+  try {
+    const response = await axiosClient.request({
+      method,
+      url,
+      data,
+      headers
+    });
+    return response.data;
+  } catch (error: any) {
+    handleAxiosError(error);
+  }
+};
 
-//         return;
-//       }
-//       if (originalConfig && !originalConfig.sent) {
-//         try {
-//           originalConfig.sent = true;
-//           await updateRefreshToken();
+// Các hàm gửi request tương ứng với các phương thức HTTP
+export const get = async (url: string, token: string) => {
+  return sendRequest('GET', url, undefined, true, token);
+};
 
-//           return axiosClient(originalConfig);
-//         } catch (err) {
-//           handleSignOut();
+export const post = async (url: string, data: any, token?: string) => {
+  return sendRequest('POST', url, data, true, token);
+};
 
-//           return Promise.reject(err);
-//         }
-//       }
-//     }
+export const put = async (url: string, data: any, token: string) => {
+  return sendRequest('PUT', url, data, true, token);
+};
 
-//     if (isAxiosError(error)) {
-//       const errorMgs =
-//         typeof error.response.data.data.message === 'string'
-//           ? error.response.data.data.message
-//           : error.response.data.data.message[0];
+export const del = async (url: string, token: string) => {
+  return sendRequest('DELETE', url, undefined, true, token);
+};
 
-//       return Promise.reject(new Error(errorMgs));
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-
-export default axiosClient;
-
-export const isAxiosError = (
-  err: unknown
-): err is AxiosError & {
-  response: {
-    data: {
-      data: {
-        message: string | string[];
-      };
-    };
-  };
-} => !!(err instanceof AxiosError && err?.response?.data);
+// Hàm gửi yêu cầu không cần token
+export const sendRequestWithoutToken = async (method: string, url: string, data?: any) => {
+  return sendRequest(method, url, data, false);
+};

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -46,6 +48,12 @@ const menuItems = [
     id: "product",
     title: "Product",
     path: "product",
+    icon: <VideoCameraOutlined />,
+  },
+  {
+    id: "order",
+    title: "Order",
+    path: "order",
     icon: <VideoCameraOutlined />,
   },
 ];

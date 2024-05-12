@@ -1,9 +1,9 @@
 import Image from "next/image";
 
-export default function Product() {
+export default function Order() {
   return (
     <div >
-      <span>product</span>
+      <span>Order</span>
     </div>
   );
 }

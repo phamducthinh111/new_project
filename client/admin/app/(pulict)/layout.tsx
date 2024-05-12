@@ -1,4 +1,3 @@
-"use client";
 
 import { QueryProvider } from "@/configs/QueryProvider";
 import { PropsWithChildren } from "react";
