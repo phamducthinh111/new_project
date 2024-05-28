@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "antd": "^5.17.3",
     "axios": "^1.6.8",
+    "dayjs": "^1.11.11",
     "js-cookie": "^3.0.5",
     "next": "14.1.4",
     "react": "^18",

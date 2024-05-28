@@ -4,18 +4,23 @@ import { Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useState } from 'react';
-import { post } from '@/configs/AxiosClient';
 import { useAppContetxt } from '@/app/AppProvider';
+import { useMutation } from 'react-query';
+import { RegisterForm, register } from '@/api/auth';
+import { useRouter } from 'next/navigation';
 
 const Register = () => {
-  const [loading, setLoading] = useState(false);
-  const onFinish = async (values: any) => {
-    // setLoading(true);
-    try {
-        const data = await post('/users',values);
-      } catch (error) {
-        console.error('Error:', error);
-      }
+  const router = useRouter();
+  const [isloadingConfỉm, setIsloadingConfỉm] = useState(false);
+  const {mutate} = useMutation(register, {
+    onSuccess: async (newData) => {
+    },
+    onError: () => {
+      setIsloadingConfỉm(false);
+    },
+  })
+  const onFinish = (values: RegisterForm) => {
+    mutate(values);
   };
 
   return (
@@ -84,7 +89,7 @@ const Register = () => {
             <Input prefix={<EnvironmentOutlined className="site-form-item-icon" />} placeholder="Address" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full" loading={loading}>
+            <Button type="primary" htmlType="submit" className="w-full" loading={isloadingConfỉm}>
               Register
             </Button>
           </Form.Item>
