@@ -11,6 +11,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response, Request } from 'express';
@@ -43,7 +44,7 @@ export class UserControler {
       if (!isUsernameUnique) {
         return res
           .status(HttpStatus.BAD_REQUEST)
-          .send(ResponseObject.fail('Usename already exists'));
+          .send(ResponseObject.fail('Username already exists'));
       }
 
       if (!isEmailUnique) {
@@ -79,7 +80,7 @@ export class UserControler {
       if (!isUsernameUnique) {
         return res
           .status(HttpStatus.BAD_REQUEST)
-          .send(ResponseObject.fail('Usename already exists'));
+          .send(ResponseObject.fail('Username already exists'));
       }
 
       if (!isEmailUnique) {
@@ -144,16 +145,39 @@ export class UserControler {
   }
 
   //manager, admin, employess
+  // @Get()
+  // async getAllUsers(@Res() res: Response) {
+  //   try {
+  //     const result = await this.userService.getAllUsers();
+  //     if (!result) {
+  //       return res
+  //         .status(HttpStatus.NOT_FOUND)
+  //         .send(ResponseObject.fail('User not found'));
+  //     }
+  //     return res.send(ResponseObject.success(result));
+  //   } catch (error) {
+  //     console.log(error);
+  //     return res
+  //       .status(HttpStatus.INTERNAL_SERVER_ERROR)
+  //       .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+  //   }
+  // }
+
   @Get()
-  async getAllUsers(@Res() res: Response) {
-    try {
-      const result = await this.userService.getAllUsers();
+  async getAllUsers(
+    @Res() res: Response,
+    @Query('delFlag') delFlag: string,
+    @CurrentUser('userId') currentUserId,
+  ) {
+    try{
+      const delFlagValue = delFlag === 'true';
+      const result = await this.userService.getAllUsers(delFlagValue,currentUserId);
       if (!result) {
         return res
           .status(HttpStatus.NOT_FOUND)
           .send(ResponseObject.fail('User not found'));
       }
-      return res.send(ResponseObject.success(result));
+      return  res.send(ResponseObject.success(result))
     } catch (error) {
       console.log(error);
       return res
@@ -210,19 +234,23 @@ export class UserControler {
     }
   }
 
-  @Get('remove')
-  async getAllRemoveUser(
+  @Put('rollback/:userId')
+  async rollbackUserByAdmin(
     @Res() res: Response,
+    @Param('userId') userId: number,
     @CurrentUser('userId') currentUserId,
   ) {
-    try{
-      const result = await this.userService.getAllRemoveUser(currentUserId);
+    try {
+      const result = await this.userService.rollBackUserByAdmin(
+        userId,
+        currentUserId,
+      );
       if (!result) {
         return res
           .status(HttpStatus.NOT_FOUND)
           .send(ResponseObject.fail('User not found'));
       }
-      return  res.send(ResponseObject.success(result))
+      return res.send(ResponseObject.success('User rollback successfully'));
     } catch (error) {
       console.log(error);
       return res

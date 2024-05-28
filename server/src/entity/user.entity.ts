@@ -25,6 +25,15 @@ export class User extends Model {
     @Column({ name: 'role' })
     role: string;
 
+    @Column({ name: 'fullname', nullable: true })
+    fullname?: string;
+
+    @Column({ name: 'sex', nullable: true })
+    sex?: string;
+
+    @Column({ name: 'birthday', nullable: true })
+    birthday?: Date;
+
     @OneToMany(type => Order, order => order.user) 
     orders: Order[];
 }

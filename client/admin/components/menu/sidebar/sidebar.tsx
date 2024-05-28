@@ -4,89 +4,125 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UploadOutlined,
+  LogoutOutlined,
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Layout, Menu } from "antd";
-import { useState } from "react";
+import { Avatar, Button, Layout, Menu, message } from "antd";
+import { useEffect, useState } from "react";
 import "./sidebar.css";
 import Link from "next/link";
+import { logout, me } from "@/api/auth";
+import { useRouter } from "next/navigation";
+import { useAppContetxt } from "@/app/AppProvider";
+import { Role } from "@/app/(private)/user/_components/user.type";
 
-const { Header, Sider, Content } = Layout;
-
-const menuItems = [
-  {
-    id: "home",
-    title: "Home",
-    path: "/dashboard",
-    icon: <VideoCameraOutlined />,
-  },
-  {
-    id: "user",
-    title: "User",
-    path: "user",
-    icon: <UserOutlined />,
-    children: [
-      {
-        id: "create-user",
-        title: "Create User",
-        path: "/user",
-      },
-      {
-        id: "update-user",
-        title: "Update User",
-        path: "/user",
-      },
-      {
-        id: "delete-user",
-        title: "Delete User",
-        path: "/user",
-      },
-    ],
-  },
-  {
-    id: "product",
-    title: "Product",
-    path: "product",
-    icon: <VideoCameraOutlined />,
-  },
-  {
-    id: "order",
-    title: "Order",
-    path: "order",
-    icon: <VideoCameraOutlined />,
-  },
-];
+const { Sider } = Layout;
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
+  const { userProfile } = useAppContetxt();
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      message.success('Logged out successfully');
+      router.push('/log-in');
+      router.refresh();
+    } catch (error: any) {
+      message.error(error.message || 'An error occurred during logout');
+    }
+  };
+
+  const menuItems = [
+    {
+      id: "home",
+      title: "Home",
+      path: "/dashboard",
+      icon: <VideoCameraOutlined />,
+    },
+    {
+      id: "user",
+      title: "User",
+      path: "user",
+      icon: <UserOutlined />,
+      children: [
+        {
+          id: "list-user",
+          title: "List User",
+          path: "/user",
+        },
+        ...(userProfile?.role === Role.admin
+          ? [
+              {
+                id: "update-user",
+                title: "List User deleted",
+                path: "/user/deleted",
+              },
+              // {
+              //   id: "delete-user",
+              //   title: "Delete User",
+              //   path: "/user/delete",
+              // },
+            ]
+          : []),
+      ],
+    },
+    {
+      id: "product",
+      title: "Product",
+      path: "product",
+      icon: <VideoCameraOutlined />,
+    },
+    {
+      id: "order",
+      title: "Order",
+      path: "order",
+      icon: <VideoCameraOutlined />,
+    },
+  ];
+  
+
   return (
-    <Sider style={{minHeight:"100vh"}} collapsible collapsed={collapsed} onCollapse={toggleCollapsed}>
-      <div className={`flex items-center justify-between p-5 text-white border-dashed border-b border-white ${collapsed && "w-20"}`}>
-        <div className="flex items-center w-full md:w-auto mb-2 md:mb-0">
-            {!collapsed && (
-              <>
+    <Sider
+      style={{ minHeight: "120vh", width: collapsed ? "80px" : "240px" }}
+      collapsible
+      collapsed={collapsed}
+      onCollapse={toggleCollapsed}
+      className="flex flex-col"
+    >
+      <div
+        className={`flex items-center justify-between p-5 text-white border-dashed border-b border-white ${collapsed ? "w-20" : "w-full"}`}
+        style={{ fontSize: "14px", fontWeight: "normal" }}
+      >
+        <div className="flex items-center flex-grow overflow-hidden">
+          {!collapsed && (
+            <>
+              <Link href='/profile'>
                 <Avatar icon={<UserOutlined />} />
-                <div className="ml-2">Avatar</div>
-              </>
-            )}
-          </div>
-        <div className="flex items-right">
+              </Link>
+              <div className="ml-2 truncate">{userProfile?.username}</div>
+            </>
+          )}
+        </div>
+        <div className="flex items-center flex-shrink-0">
           <Button onClick={toggleCollapsed}>
             {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </Button>
         </div>
       </div>
       <Menu
-        className="pt-1"
-        theme="dark" 
-        mode="inline" 
+        className="pt-1 flex-grow"
+        theme="dark"
+        mode="inline"
         defaultSelectedKeys={["1"]}
-        inlineCollapsed={collapsed}>
+        inlineCollapsed={collapsed}
+        style={{ fontSize: "14px", fontWeight: "normal" }}
+      >
         {menuItems.map((item) =>
           item.children ? (
             <Menu.SubMenu
@@ -115,7 +151,13 @@ const SideBar = () => {
           )
         )}
       </Menu>
+      <div className="flex justify-center mt-auto mb-4">
+        <Button type="primary" danger icon={<LogoutOutlined />} onClick={handleLogout}>
+          {!collapsed && 'Log Out'}
+        </Button>
+      </div>
     </Sider>
   );
+  
 };
 export default SideBar;

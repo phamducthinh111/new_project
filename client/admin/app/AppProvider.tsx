@@ -1,11 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { me } from "@/api/auth";
+import { sessionToken } from "@/configs/AxiosClient";
+import { createContext, useContext, useEffect, useLayoutEffect, useState, } from "react";
 
-const AppContext = createContext({ 
-    sessionToken: "",
-    setSessionToken: (sessionToken : string) => {}
-});
+const AppContext = createContext<{
+  userProfile: any;
+  setUserProfile: React.Dispatch<React.SetStateAction<any>>;
+  refetchProfile: () => void;
+} | null>(null);
 
 export const useAppContetxt = () => {
   const context = useContext(AppContext);
@@ -22,10 +25,30 @@ export default function AppProvider({
   children: React.ReactNode
   initialSessionToken?: string
 }) {
-  const [sessionToken, setSessionToken] = useState(initialSessionToken)
+  const [userProfile, setUserProfile] = useState(null);
+  const [triggerRefetch, setTriggerRefetch] = useState(false);
+  useState(() => {
+    sessionToken.value = initialSessionToken
+  });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const result = await me();
+      if(result) {
+        setUserProfile(result);
+        setTriggerRefetch(false)
+      }
+    };
+    fetchProfile();
+  }, [triggerRefetch]);
+
+  const refetchProfile = () => {
+    setTriggerRefetch(true);
+  };
+  
   return (
-    <AppContext.Provider value={{ sessionToken, setSessionToken}}>
-        {children}
+    <AppContext.Provider value={{ userProfile, setUserProfile, refetchProfile }}>
+      {children}
     </AppContext.Provider>
   )
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
@@ -80,12 +80,12 @@ export class UserService {
     return newUser;
   }
 
-  async getAllUsers(): Promise<any> {
-    return await this.userRepository.find({
-      where: { delFlag: false },
-      relations: ['orders'],
-    });
-  }
+  // async getAllUsers(): Promise<any> {
+  //   return await this.userRepository.find({
+  //     where: { delFlag: false },
+  //     relations: ['orders'],
+  //   });
+  // }
 
   async updateUserById(updateUserDto: UpdateUserDto, currentUserId: number) {
     const findUser = await this.userRepository.findOne({
@@ -104,10 +104,12 @@ export class UserService {
     findUser.address = updateUserDto.address ?? findUser.address;
     findUser.updateDate = new Date();
     findUser.updateUser = findUser.username;
+    findUser.sex = updateUserDto.sex ?? findUser.sex;
+    findUser.birthday = updateUserDto.birthday ?? findUser.birthday;
+    findUser.fullname = updateUserDto.fullname ?? findUser.fullname;
     findUser.role = updateUserDto.role ?? findUser.role;
-
-    const result = await this.userRepository.update(currentUserId, findUser);
-    return result;
+    await this.userRepository.update(currentUserId, findUser);
+    return findUser;
   }
 
   async removeUser(userId: number, currentUserId: number) {
@@ -144,15 +146,37 @@ export class UserService {
     return await this.userRepository.delete(userId);
   }
 
-  async getAllRemoveUser(currentUserId: number) {
+  async rollBackUserByAdmin(userId: number, currentUserId: number) {
+    const findUser = await this.userRepository.findOne({ where: { userId, delFlag: true } });
     const findCurrenUser = await this.userRepository.findOne({
       where: { userId: currentUserId },
     });
-    if(findCurrenUser.role !== Role.admin) {
-      throw new NotFoundException(`Account doesn't have permission to delete`); 
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    if (findCurrenUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to Rollback`);
+    }
+    findUser.updateUser = findCurrenUser.username;
+    findUser.updateDate = new Date();
+    findUser.delFlag = false;
+    const result = await this.userRepository.update(userId, findUser);
+    return result;
+  }
+
+  async getAllUsers(delFlag: boolean,currentUserId: number) {
+    const findCurrenUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
+    if (!findCurrenUser) {
+      throw new NotFoundException('Current user not found');
+    }
+
+    if (delFlag && findCurrenUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to view deleted users`);
     }
     return await this.userRepository.find({
-      where: {delFlag:true},
+      where: {delFlag},
     })
   }
 
