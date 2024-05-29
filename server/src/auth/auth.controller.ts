@@ -34,11 +34,12 @@ export class AuthController {
 
   @Get('profile')
   async getUser(
-    @Headers('authorization') authorization: string,
+    // @Headers('authorization') authorization: string,
     @Res() res: Response,
+    @CurrentUser('userId') currentUserId,
   ) {
-    const token = authorization.split(' ')[1];
-    const user = await this.authService.getUserFromToken(token);
+    // const token = authorization.split(' ')[1];
+    const user = await this.authService.getAuthUserInfo(currentUserId);
     return res.send(ResponseObject.success(user)) ;
   }
 

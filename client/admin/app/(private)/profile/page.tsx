@@ -33,6 +33,7 @@ const Profile = () => {
   const router = useRouter();
   const { userProfile, setUserProfile } = useAppContetxt();
   const [form] = Form.useForm();
+  const [isDisableSave, setIsDisableSave] = useState(true);
   const [changedValues, setChangedValues] = useState<Partial<UserProfile>>({});
 
   const onValuesChange = (changed: UserProfile) => {
@@ -41,12 +42,23 @@ const Profile = () => {
       ...changed,
     }));
   };
+
+  const onFieldsChange = () => {
+    const fieldErrors = form.getFieldsError();
+    const hasFieldErrors = fieldErrors.some(
+      ({ errors }) => errors && errors.length > 0
+    );
+    const formValues  = form.getFieldsValue();
+    const { username, email, ...rest } = formValues;
+    const isAnyFieldEmpty = !rest
+    setIsDisableSave(isAnyFieldEmpty || hasFieldErrors)
+  }
+
   const handleSave = async () => {
     try {
       const response = await updateProfile(changedValues);
       if (response) {
         setUserProfile(response);
-        // router.refresh();
         message.success(`Update profile successfully`);
       }
     } catch (error) {
@@ -60,6 +72,7 @@ const Profile = () => {
       {/* <p className="mb-4 text-gray-500">Quản lý thông tin hồ sơ để bảo mật tài khoản</p> */}
       {userProfile && (
         <Form
+          onFieldsChange={onFieldsChange}
           form={form}
           layout="vertical"
           onValuesChange={onValuesChange}
@@ -105,7 +118,7 @@ const Profile = () => {
                 // ]}
               >
                 <Input
-                  placeholder="fullname"
+                  placeholder="Your name"
                   // disabled
                 />
               </Form.Item>
@@ -231,6 +244,7 @@ const Profile = () => {
                 size={"large"}
                 type="primary"
                 htmlType="submit"
+                disabled={isDisableSave}
               >
                 Save
               </Button>

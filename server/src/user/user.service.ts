@@ -50,6 +50,10 @@ export class UserService {
     return this.userRepository.findOne({ where: { username, delFlag: false } });
   }
 
+  async findOneById(userId: number): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { userId, delFlag: false } });
+  }
+
   async getUserById(userId: number) {
     return await this.userRepository.findOne({
       where: { userId, delFlag: false },

@@ -58,31 +58,12 @@ export class AuthService {
       const accessToken = this.getAccessToken(
         user.username,
         user.role,
-        user.address,
-        user.phone,
-        user.email,
-        user.fullname,
-        user.birthday,
-        user.sex,
       );
       const refreshToken = this.getRefreshToken(
         user.username,
         user.role,
-        user.address,
-        user.phone,
-        user.email,
-        user.fullname,
-        user.birthday,
-        user.sex,
       );
       const { email, role, phone, address, username } = user;
-      // const authUser = {
-      //   email,
-      //   role,
-      //   username,
-      //   phone,
-      //   address
-      // }
       const token = {
         access_Token: accessToken,
         refresh_Token: refreshToken,
@@ -95,24 +76,27 @@ export class AuthService {
     return null;
   }
 
-  // async getAuthUserInfo(userId: string): Promise<any> {
-  //   const user = await this.usersService.findOneByUsername(userId);
-  //   if (!user) {
-  //     throw new BadRequestException('Username is incorrect or inactive');
-  //   }
-  //   if (user) {
-  //     const usrName = user.username;
-  //     const { email, role, phone } = user;
-  //     const authUser = {
-  //       email,
-  //       role,
-  //       usrName,
-  //       phone
-  //     }
-  //     return authUser;
-  //   }
-  //   return null;
-  // }
+  async getAuthUserInfo(userId: number): Promise<any> {
+    const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      throw new BadRequestException('Username is incorrect or inactive');
+    }
+    if (user) {
+      const { email, role, phone, username, sex, fullname, birthday, address } = user;
+      const authUser = {
+        email,
+        role,
+        username,
+        phone,
+        sex,
+        fullname,
+        birthday,
+        address
+      }
+      return authUser;
+    }
+    return null;
+  }
 
   async getUserFromToken(token: string) {
     try {
@@ -126,22 +110,10 @@ export class AuthService {
   getAccessToken(
     username: string,
     role: string,
-    address: string,
-    phone: string,
-    email: string,
-    fullname: string,
-    birthday: Date,
-    sex: string,
   ) {
     const payload: TokenPayload = {
       username,
       role,
-      address,
-      phone,
-      email,
-      fullname,
-      sex,
-      birthday,
     };
     const accessToken = this.jwtService.sign(payload, {
       secret: jwtConstants.secret,
@@ -153,22 +125,10 @@ export class AuthService {
   getRefreshToken(
     username: string,
     role: string,
-    address: string,
-    phone: string,
-    email: string,
-    fullname: string,
-    birthday: Date,
-    sex: string,
   ) {
     const payload: TokenPayload = {
       username,
       role,
-      address,
-      phone,
-      email,
-      fullname,
-      sex,
-      birthday,
     };
     const refreshToken = this.jwtService.sign(payload, {
       secret: jwtConstants.secret,
