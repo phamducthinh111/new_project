@@ -89,11 +89,12 @@ const SideBar = () => {
 
   return (
     <Sider
-      style={{ minHeight: "120vh", width: collapsed ? "80px" : "240px" }}
+      style={{ minHeight: "100vh", width: collapsed ? "80px" : "240px" }}
       collapsible
       collapsed={collapsed}
       onCollapse={toggleCollapsed}
       className="flex flex-col"
+      trigger={null}
     >
       <div
         className={`flex items-center justify-between p-5 text-white border-dashed border-b border-white ${collapsed ? "w-20" : "w-full"}`}
@@ -150,6 +151,14 @@ const SideBar = () => {
             </Menu.Item>
           )
         )}
+        {/* <div className="flex justify-center mt-auto mb-4 w-full">
+        <Menu.Item >
+          <Button type="primary" danger icon={<LogoutOutlined />} onClick={handleLogout}>
+          {!collapsed && 'Log Out'}
+        </Button>
+          </Menu.Item>
+        </div> */}
+          
       </Menu>
       <div className="flex justify-center mt-auto mb-4">
         <Button type="primary" danger icon={<LogoutOutlined />} onClick={handleLogout}>
