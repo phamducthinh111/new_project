@@ -8,8 +8,8 @@ import { SERVER_ERROR_MESSAGE } from "src/libs/constants";
 import { storageConfig } from "helpers/config";
 import { UpdateProductDto } from "./dto/updatePeoduct.dto";
 import { AuthGuard } from "@nestjs/passport";
+import { Public } from "src/libs/decorators/public.decorators";
 
-@UseGuards(AuthGuard('jwt'))
 @Controller('product')
 export class ProductController {
     constructor(private readonly productService: ProductService) {}
@@ -57,6 +57,7 @@ export class ProductController {
         }
     }
 
+    @Public()
     @Get()
     async getAllProduct(@Res() res: Response) {
         try {

@@ -23,7 +23,7 @@ import { User } from 'src/entity';
 import { Roles } from 'src/libs/decorators/roles.decorator';
 import { Role } from 'src/libs/decorators/role.enum';
 import { RolesGuard } from 'src/libs/decorators/guard/roles.guard';
-import { CreateUserDto, UpdateRoleDto, UpdateUserDto } from './dto';
+import { CreateUserDto, PasswordProfileDto, UpdateRoleDto, UpdateUserDto } from './dto';
 
 @Controller('users')
 export class UserControler {
@@ -144,24 +144,25 @@ export class UserControler {
     }
   }
 
-  //manager, admin, employess
-  // @Get()
-  // async getAllUsers(@Res() res: Response) {
-  //   try {
-  //     const result = await this.userService.getAllUsers();
-  //     if (!result) {
-  //       return res
-  //         .status(HttpStatus.NOT_FOUND)
-  //         .send(ResponseObject.fail('User not found'));
-  //     }
-  //     return res.send(ResponseObject.success(result));
-  //   } catch (error) {
-  //     console.log(error);
-  //     return res
-  //       .status(HttpStatus.INTERNAL_SERVER_ERROR)
-  //       .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
-  //   }
-  // }
+  @Put('update/password')
+  async changePasswordProfile (
+    @Res() res: Response,
+    @Body() passwordProfile: PasswordProfileDto,
+    @CurrentUser('userId') currentUserId,
+  ) {
+    try {
+      const result = await this.userService.changePasswordById(
+        passwordProfile,
+        currentUserId,
+      );
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send(ResponseObject.fail(error.response.message));
+    }
+  }
 
   @Get()
   async getAllUsers(

@@ -9,6 +9,10 @@ export const errorMessages = {
     pattern:
       "Password is invalid",
   },
+  confirmPassword: {
+    required: 'Please enter your confirm password!',
+    notMatch: "Password don't match"
+  },
   email: {
     require: 'Please enter an email address!',
     pattern: 'Please enter a valid email address!',
