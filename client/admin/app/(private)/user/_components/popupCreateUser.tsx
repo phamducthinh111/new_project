@@ -27,7 +27,7 @@ interface CreateUserFormProps {
   currentUser?: ListUser;
 }
 
-const CreateUserForm: React.FC<CreateUserFormProps> = (
+const CreateUserForm = (
   props: CreateUserFormProps
 ) => {
   const { form, onFieldsChange, isPopupCreate, currentUser } = props;

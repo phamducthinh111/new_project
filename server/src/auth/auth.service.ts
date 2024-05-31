@@ -51,7 +51,7 @@ export class AuthService {
       user.password,
     );
     if (!passwordMatches) {
-      throw new UnauthorizedException('Password is incorrect or inactive');
+      throw new UnauthorizedException('Password is incorrect');
     }
 
     if (user) {
@@ -82,8 +82,9 @@ export class AuthService {
       throw new BadRequestException('Username is incorrect or inactive');
     }
     if (user) {
-      const { email, role, phone, username, sex, fullname, birthday, address } = user;
+      const { email, role, phone, username, sex, fullname, birthday, address, userId } = user;
       const authUser = {
+        userId,
         email,
         role,
         username,

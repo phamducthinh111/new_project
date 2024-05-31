@@ -37,7 +37,3 @@ export const deleteUser = async (usrId: any) => {
   return response;
 }
 
-export const updateProfile = async (req: Partial<UserProfile>) => {
-  const response = await http.put("users/update", { body: req });
-  return response.data;
-}

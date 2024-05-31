@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import { Avatar, Button, Layout, Menu, message } from "antd";
 import { useEffect, useState } from "react";
-import "./sidebar.css";
+// import "./sidebar.css";
 import Link from "next/link";
 import { logout, me } from "@/api/auth";
 import { useRouter } from "next/navigation";
@@ -89,7 +89,7 @@ const SideBar = () => {
 
   return (
     <Sider
-      style={{ minHeight: "100vh", width: collapsed ? "80px" : "240px" }}
+      style={{width: collapsed ? "80px" : "240px" }}
       collapsible
       collapsed={collapsed}
       onCollapse={toggleCollapsed}
@@ -97,9 +97,7 @@ const SideBar = () => {
       trigger={null}
     >
       <div
-        className={`flex items-center justify-between p-5 text-white border-dashed border-b border-white ${collapsed ? "w-20" : "w-full"}`}
-        style={{ fontSize: "14px", fontWeight: "normal" }}
-      >
+        className={`flex items-center justify-between p-5 text-white border-dashed border-b border-white ${collapsed ? "w-20" : "w-full"}`}>
         <div className="flex items-center flex-grow overflow-hidden">
           {!collapsed && (
             <>
@@ -122,7 +120,7 @@ const SideBar = () => {
         mode="inline"
         defaultSelectedKeys={["1"]}
         inlineCollapsed={collapsed}
-        style={{ fontSize: "14px", fontWeight: "normal" }}
+        // style={{ fontSize: "14px", fontWeight: "normal" }}
       >
         {menuItems.map((item) =>
           item.children ? (

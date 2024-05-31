@@ -4,7 +4,7 @@ import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Role } from 'src/libs/decorators/role.enum';
-import { CreateUserDto, UpdateRoleDto, UpdateUserDto } from './dto';
+import { CreateUserDto, PasswordProfileDto, UpdateRoleDto, UpdateUserDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -112,6 +112,26 @@ export class UserService {
     findUser.birthday = updateUserDto.birthday ?? findUser.birthday;
     findUser.fullname = updateUserDto.fullname ?? findUser.fullname;
     findUser.role = updateUserDto.role ?? findUser.role;
+    await this.userRepository.update(currentUserId, findUser);
+    return findUser;
+  }
+
+  async changePasswordById(passwordProfileDto: PasswordProfileDto, currentUserId: number) {
+    const findUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
+    const passwordMatches = await bcrypt.compareSync(
+      passwordProfileDto.currentPassword,
+      findUser.password,
+    );
+    if (!passwordMatches) {
+      throw new NotFoundException('Password is incorrect');
+    }
+    const hashedPassword = await bcrypt.hash(passwordProfileDto.newPassword, 10);
+    findUser.password = hashedPassword
     await this.userRepository.update(currentUserId, findUser);
     return findUser;
   }

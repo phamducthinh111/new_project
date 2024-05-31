@@ -1,5 +1,5 @@
 export interface UserProfile {
-    userId?: string;
+    userId?: number;
     username: string;
     email: string;
     phone: string;
@@ -9,3 +9,8 @@ export interface UserProfile {
     sex?: string;
     fullname?: string
   }
+
+export interface PasswordForm {
+  currentPassword: string;
+  newPassword: string;
+}

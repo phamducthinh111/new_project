@@ -3,16 +3,15 @@
 import { Breadcrumb, Layout } from "antd";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
-import { HomeOutlined } from '@ant-design/icons';
+import { HomeOutlined } from "@ant-design/icons";
+import { usePathname, useRouter } from "next/navigation";
 const { Content } = Layout;
 
-interface MenuContentProps extends PropsWithChildren {
-  currentPath: string; // Đường dẫn hiện tại
-}
 
-const MenuContent = ({ children, currentPath }: Readonly<MenuContentProps>) => {
-  const pathSnippets = currentPath.split('/').filter((i) => i);
-  
+const MenuContent = ({ children }: Readonly<PropsWithChildren>) => {
+  const pathname = usePathname();
+  const pathSnippets = pathname.split("/").filter((i) => i);
+
   const breadcrumbItems = [
     <Breadcrumb.Item key="dashboard">
       <Link href="/dashboard">
@@ -21,10 +20,15 @@ const MenuContent = ({ children, currentPath }: Readonly<MenuContentProps>) => {
     </Breadcrumb.Item>,
   ].concat(
     pathSnippets.map((snippet, index) => {
-      const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
+      const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
+      const isLast = index === pathSnippets.length - 1;
       return (
         <Breadcrumb.Item key={url}>
-          <Link href={url}>{snippet}</Link>
+          {isLast ? (
+            snippet
+          ) : (
+            <Link href={url}>{decodeURIComponent(snippet)}</Link>
+          )}
         </Breadcrumb.Item>
       );
     })
@@ -38,9 +42,7 @@ const MenuContent = ({ children, currentPath }: Readonly<MenuContentProps>) => {
         minHeight: "100vh",
       }}
     >
-      <Breadcrumb separator=" / ">
-        {breadcrumbItems}
-      </Breadcrumb>
+      <Breadcrumb separator=" / ">{breadcrumbItems}</Breadcrumb>
       {children}
     </Content>
   );
