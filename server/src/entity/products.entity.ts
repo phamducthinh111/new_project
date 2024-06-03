@@ -1,9 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Image } from "./images.entity";
 import { OrderItem } from "./orderItem.entity";
+import { Model } from "./model.entity";
 
 @Entity('products')
-export class Product {
+export class Product extends Model {
     @PrimaryGeneratedColumn({ name : 'id'})
     productId: number;
 
@@ -27,6 +28,15 @@ export class Product {
 
     @Column({ name: 'location' })
     location: String;
+
+    @Column({ name: 'label' })
+    label: string;
+
+    @Column({ name: 'rating', nullable: true })
+    rating?: string;
+
+    @Column({ name: 'discount', nullable: true })
+    discount?: string;
 
     @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
     orderItems: OrderItem[];

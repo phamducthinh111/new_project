@@ -7,25 +7,26 @@ export class CreateProductDto {
 
   @IsString()
   @IsNotEmpty()
-  readonly name: String;
+  readonly name: string;
 
   @IsString()
   @IsNotEmpty()
-  readonly desc: String;
+  readonly desc: string;
 
   @IsNumber()
   @IsNotEmpty()
   readonly price: number;
-  
-  // @IsString()
-  // @IsNotEmpty()
-  // readonly imageUrl: String;
 
   @IsString()
   @IsNotEmpty()
-  readonly type: String;
+  readonly type: string;
 
   @IsString()
   @IsNotEmpty()
-  readonly loc: String;
+  readonly loc: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly label: string;
+
 }
