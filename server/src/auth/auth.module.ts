@@ -6,13 +6,15 @@ import { AuthController } from './auth.controller';
 import { JwtTokenStrategy } from './stategy/jwt.straegy';
 
 @Module({
-
-    imports: [UserModule, JwtModule.register({
-        secret: '865362',
-        signOptions: {expiresIn: '10m'}
-    })],
-    providers: [AuthService,JwtTokenStrategy],
-    controllers: [AuthController],
-    exports: [AuthService]
+  imports: [
+    UserModule,
+    JwtModule.register({
+      secret: '865362',
+      signOptions: { expiresIn: '10m' },
+    }),
+  ],
+  providers: [AuthService, JwtTokenStrategy],
+  controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

@@ -8,6 +8,9 @@ import * as fs from 'fs';
 import { Image } from "src/entity/images.entity";
 import { UpdateProductDto } from "./dto/updatePeoduct.dto";
 import { validate } from "class-validator";
+import { User } from "src/entity";
+import { UserService } from "src/user/user.service";
+import { Role } from "src/libs/decorators/role.enum";
 
 @Injectable()
 export class ProductService {
@@ -15,31 +18,54 @@ export class ProductService {
         @InjectRepository(Product)
         private productRepository: Repository<Product>,
         @InjectRepository(Image)
-        private ImageRepository: Repository<Image>
+        private ImageRepository: Repository<Image>,
+        // @InjectRepository(User)
+        // private userRepository: Repository<User>
+        private usersService: UserService,
     ) {}
-    async createProduct(createProductDto: CreateProductDto,  ) {
-        // const imageName = this.handleImageUpload(createProductDto.imageUrl);
+    async createProduct(currentUserId, createProductDto: CreateProductDto) {
+        const findUser = await this.usersService.findOneById(currentUserId);
+        if (!findUser) {
+        throw new NotFoundException(`User with id ${currentUserId} not found`);
+        }
+
+        if (findUser.role !== Role.admin && findUser.role !== Role.manager) {
+            throw new NotFoundException(`Account doesn't have permission to create Product`);
+        }
         const newProduct = new Product();
 
         newProduct.name = createProductDto.name
         newProduct.quantity = createProductDto.quantity
         newProduct.description = createProductDto.desc
         newProduct.price = createProductDto.price
-        // newProduct.imageUrl = createProductDto.imageUrl
+        newProduct.label = createProductDto.label
         newProduct.typeName = createProductDto.type
         newProduct.location = createProductDto.loc
+        newProduct.createDate = new Date();
+        newProduct.createUser = findUser.username;
+        newProduct.updateDate = new Date();
+        newProduct.updateUser = findUser.username;
 
         this.productRepository.insert(newProduct);
         return newProduct;
     }
 
-    async upLoadImage(productId: number, file: any) {
+    async upLoadListImage(currentUserId ,productId: number, file: string) {
+        // const findUser = await this.usersService.findOneById(currentUserId);
+        // if (!findUser) {
+        //     throw new NotFoundException(`User with id ${currentUserId} not found`);
+        //     }
+    
+        // if (findUser.role !== Role.admin && findUser.role !== Role.manager) {
+        //         throw new NotFoundException(`Account doesn't have permission to create Product`);
+        //     }
         const findProduct = await this.productRepository.findOne({where: {productId},relations:['imageUrl']},);
         if (!findProduct) {
             throw new NotFoundException(`Product with id ${findProduct} not found`);
           }
         const images = new Image();
         images.imageUrl = file;
+
         findProduct.imageUrl.push(images)
 
         return await this.productRepository.save(findProduct)
