@@ -13,4 +13,7 @@ export class Image {
   @ManyToOne(() => Product, (product) => product.imageUrl)
   product: Product;
 
+  @ManyToOne(() => Product, (product) => product.imageTitle)
+  productTitle: Product;
+
 }

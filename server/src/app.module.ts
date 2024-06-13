@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,7 +18,7 @@ config();
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: resolve('C:\\Users\\ADMIN\\Desktop\\code\\new_project\\server\\uploads', '..', 'uploads'),
       serveRoot: '/uploads',
       serveStaticOptions: {
         index: false,  

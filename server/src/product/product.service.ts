@@ -51,14 +51,14 @@ export class ProductService {
     }
 
     async upLoadListImage(currentUserId ,productId: number, file: string) {
-        // const findUser = await this.usersService.findOneById(currentUserId);
-        // if (!findUser) {
-        //     throw new NotFoundException(`User with id ${currentUserId} not found`);
-        //     }
+        const findUser = await this.usersService.findOneById(currentUserId);
+        if (!findUser) {
+            throw new NotFoundException(`User with id ${currentUserId} not found`);
+            }
     
-        // if (findUser.role !== Role.admin && findUser.role !== Role.manager) {
-        //         throw new NotFoundException(`Account doesn't have permission to create Product`);
-        //     }
+        if (findUser.role !== Role.admin && findUser.role !== Role.manager) {
+                throw new NotFoundException(`Account doesn't have permission to create Product`);
+            }
         const findProduct = await this.productRepository.findOne({where: {productId},relations:['imageUrl']},);
         if (!findProduct) {
             throw new NotFoundException(`Product with id ${findProduct} not found`);
@@ -71,9 +71,30 @@ export class ProductService {
         return await this.productRepository.save(findProduct)
     }
 
+    async upLoadTopicImage(currentUserId ,productId: number, file: string) {
+        const findUser = await this.usersService.findOneById(currentUserId);
+        if (!findUser) {
+            throw new NotFoundException(`User with id ${currentUserId} not found`);
+            }
+    
+        if (findUser.role !== Role.admin && findUser.role !== Role.manager) {
+                throw new NotFoundException(`Account doesn't have permission to create Product`);
+            }
+        const findProduct = await this.productRepository.findOne({where: {productId},relations:['imageTitle']},);
+        if (!findProduct) {
+            throw new NotFoundException(`Product with id ${findProduct} not found`);
+          }
+        const images = new Image();
+        images.imageUrl = file;
+
+        findProduct.imageTitle.push(images)
+
+        return await this.productRepository.save(findProduct)
+    }
+
     async getAllProduct() {
         return await this.productRepository.find({
-            relations: ['imageUrl']
+            relations: ['imageUrl', 'imageTitle']
         });
     }
 

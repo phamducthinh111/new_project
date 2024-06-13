@@ -23,6 +23,10 @@ export class Product extends Model {
     @OneToMany(() => Image, (image) => image.product, { cascade: true }) 
     imageUrl: Image[];
 
+    @OneToMany(() => Image, (image) => image.product, { cascade: true })
+    @JoinColumn()
+    imageTitle: Image[];
+
     @Column({ name: 'type_name' })
     typeName: String;
 
