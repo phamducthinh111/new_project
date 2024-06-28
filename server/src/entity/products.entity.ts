@@ -20,12 +20,8 @@ export class Product extends Model {
     @Column({ name: 'quantity' })
     quantity: number;
 
-    @OneToMany(() => Image, (image) => image.product, { cascade: true }) 
-    imageUrl: Image[];
-
     @OneToMany(() => Image, (image) => image.product, { cascade: true })
-    @JoinColumn()
-    imageTitle: Image[];
+    imageUrl: Image[];
 
     @Column({ name: 'type_name' })
     typeName: String;

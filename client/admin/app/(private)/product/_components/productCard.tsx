@@ -1,66 +1,52 @@
 import React, { useState } from "react";
 import { Card, Button, Row, Col, Carousel } from "antd";
-import { ShoppingCartOutlined } from "@ant-design/icons";
+import { DeleteOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ProductDetail } from "./product.type";
 
 const { Meta } = Card;
 
-const ProductCard = ({ productDentail }: any) => {
-  //  const [test,setTest] = useState()
-  productDentail.imageUrl.map((img: any) => console.log(img.imageUrl));
+interface ProductCardProps {
+  productDentail: ProductDetail;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({ productDentail }) => {
+  const router = useRouter()
+  
   return (
     <div className="mb-5">
-      <Card 
-        hoverable 
-        className="bg-gray-100 border-2 border-gray-300 rounded-lg "
-       >
-        <Row>
-          <Col span={6} className="flex justify-center items-center">
- 
-              {productDentail.imageUrl &&
-                productDentail.imageUrl.map((img: any) => (
-                  <div key={img.imageId} className="overflow-hidden rounded-xl relative">
-                  <img
-                    key={img.imageId}
-                    src={`${process.env.NEXT_PUBLIC_SERVER_URL}/${img.imageUrl}`}
-                    alt={`Product Image ${img.imageId}`}
-                    className="w-4/5"
-                  />
-                </div>
-                ))}
-            {/* </Carousel> */}
-          </Col>
-          <Col span={18} >
-            <Meta
-              title={productDentail.name}
-              description={
-                <div>
-                  <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <p><strong>Price:</strong> ${productDentail.price}</p>
-                  </Col>
-                  <Col span={12}>
-                    <p><strong>Quantity:</strong> {productDentail.quantity}</p>
-                  </Col>
-                </Row>
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <p><strong>Location:</strong> {productDentail.location}</p>
-                  </Col>
-                  <Col span={12}>
-                    <p><strong>Type:</strong> {productDentail.typeName}</p>
-                  </Col>
-                </Row>
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <p><strong>Label:</strong> {productDentail.label}</p>
-                  </Col>
-                </Row>
-                </div>
-              }
-            />
-          </Col>
-        </Row>
+      <Card
+        hoverable
+        onClick={()=> {router.push(`product/${productDentail.productId}`)}}
+        style={{ width: 300, height: "100%" }}
+        className=" border-2 border-gray-300 rounded-lg"
+        cover={
+          // <img/>
+          productDentail.imageUrl &&
+          productDentail.imageUrl
+            .filter((img: any) => img.imageType === "thumbnail")
+            .map((img: any) => (
+              <div
+                key={img.imageId}
+                className="flex justify-center items-center h-full p-2"
+              >
+                <img
+                  src={`${process.env.NEXT_PUBLIC_SERVER_URL}/${img.imageUrl}`}
+                  alt={`Product Image ${img.imageId}`}
+                  className="max-w-full h-72 object-cover transition-transform duration-300 transform hover:scale-105"
+                />
+              </div>
+            ))
+        }
+        actions={[<DeleteOutlined
+          onClick={()=>{console.log('th')}} 
+          key={'delete'}/>]}
+      >
+        <Meta
+          title={productDentail.name}
+          description={productDentail.typeName}
+        />
       </Card>
     </div>
   );
