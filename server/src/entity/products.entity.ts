@@ -20,7 +20,7 @@ export class Product extends Model {
     @Column({ name: 'quantity' })
     quantity: number;
 
-    @OneToMany(() => Image, (image) => image.product, { cascade: true }) 
+    @OneToMany(() => Image, (image) => image.product, { cascade: true })
     imageUrl: Image[];
 
     @Column({ name: 'type_name' })

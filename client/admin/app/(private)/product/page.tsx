@@ -5,10 +5,11 @@ import ProductCard from "./_components/productCard";
 import { useMutation } from "react-query";
 import { getAllProduct } from "@/api/product";
 import { useEffect, useState } from "react";
-import { message } from "antd";
+import { Col, Row, message } from "antd";
+import { ProductDetail } from "./_components/product.type";
 
 export default function Product() {
-  const [productData,setProductData] = useState([])
+  const [productData, setProductData] = useState<ProductDetail[]>([]);
   // const { mutate, isLoading } = useMutation(getAllProduct, {
   //   onSuccess: (response) => {
   //     setProductData(response);
@@ -19,7 +20,7 @@ export default function Product() {
   //   },
   // });
 
-  useEffect(()=> {
+  useEffect(() => {
     const fetchData = async () => {
       const response = await getAllProduct();
       if (response) {
@@ -28,17 +29,18 @@ export default function Product() {
       }
     };
     fetchData();
-  },[])
+  }, []);
 
   return (
-    <div>
-      {
-        productData && (
-          productData.map((product: any) => 
-            <ProductCard productDentail={product}/>
-          )
-        )
-      }
+    <div className="mt-5">
+      <Row justify={'center'}>
+        {productData &&
+          productData.map((product: any, index: number) => (
+            <Col span={8} key={index} className="p-2">
+              <ProductCard productDentail={product} />
+            </Col>
+          ))}
+      </Row>
     </div>
   );
 }

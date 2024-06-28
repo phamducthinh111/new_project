@@ -59,15 +59,10 @@ const SideBar = () => {
         ...(userProfile?.role === Role.admin
           ? [
               {
-                id: "update-user",
+                id: "delete-user",
                 title: "List User deleted",
                 path: "/user/deleted",
               },
-              // {
-              //   id: "delete-user",
-              //   title: "Delete User",
-              //   path: "/user/delete",
-              // },
             ]
           : []),
       ],
@@ -77,6 +72,22 @@ const SideBar = () => {
       title: "Product",
       path: "product",
       icon: <VideoCameraOutlined />,
+      children: [
+        {
+          id: "list-product",
+          title: "List Product",
+          path: "/product",
+        },
+        ...(userProfile?.role === Role.admin
+          ? [
+              {
+                id: "delete-product",
+                title: "List Product deleted",
+                path: "/product/deleted",
+              },
+            ]
+          : []),
+      ],
     },
     {
       id: "order",
