@@ -28,6 +28,7 @@ import { CurrentUser } from 'src/libs/decorators/current-user.decorator';
 
 @Controller('product')
 
+@Public()
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -47,8 +48,10 @@ export class ProductController {
         .status(HttpStatus.NOT_FOUND)
         .send(ResponseObject.fail(error.response.message));
     }
+    // console.log(createProductDto)
   }
 
+  // @Public()
   @Post('upload-img/:productId')
   @UseInterceptors(
     FileInterceptor('imageUrl', {
@@ -56,11 +59,14 @@ export class ProductController {
     }),
   )
   async uploadListImage(
+    // @Body() createProductDto: CreateProductDto,
     @CurrentUser('userId') currentUserId,
     @Param('productId') productId: number,
     @Res() res: Response,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    // console.log('product')
+    // console.log(file.destination + '/' + file.filename);
     try {
       // const filePath = `uploads/product/${file.filename}`;
       // const fileUrl = `${req.protocol}://${req.get('Host')}/${filePath}`;
@@ -73,38 +79,38 @@ export class ProductController {
     } catch (error) {
       console.log(error);
       return res
-        .status(HttpStatus.BAD_REQUEST)
-        .send(ResponseObject.fail(error.response.message));
-    }
-  }
-
-  @Post('upload-titleImg/:productId')
-  @UseInterceptors(
-    FileInterceptor('imageUrl', {
-      storage: storageConfig('product'),
-    }),
-  )
-  async uploadTitleImage(
-    // @Body() createProductDto: CreateProductDto,
-    @CurrentUser('userId') currentUserId,
-    @Param('productId') productId: number,
-    @Res() res: Response,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    try {
-      const result = await this.productService.upLoadTopicImage(
-        currentUserId,
-        productId,
-        file.destination + '/' + file.filename
-      );
-      return res.send(ResponseObject.success(result));
-    } catch (error) {
-      console.log(error);
-      return res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
     }
   }
+
+  // @Post('upload-topicimg/:productId')
+  // @UseInterceptors(
+  //   FileInterceptor('imageUrl', {
+  //     storage: storageConfig('product'),
+  //   }),
+  // )
+  // async uploadTopicImage(
+  //   // @Body() createProductDto: CreateProductDto,
+  //   @CurrentUser('userId') currentUserId,
+  //   @Param('productId') productId: number,
+  //   @Res() res: Response,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   try {
+  //     const result = await this.productService.upLoadTopicImage(
+  //       currentUserId,
+  //       productId,
+  //       file.destination + '/' + file.filename
+  //     );
+  //     return res.send(ResponseObject.success(result));
+  //   } catch (error) {
+  //     console.log(error);
+  //     return res
+  //       .status(HttpStatus.INTERNAL_SERVER_ERROR)
+  //       .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+  //   }
+  // }
 
   @Public()
   @Get()

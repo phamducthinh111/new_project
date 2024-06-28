@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,12 +14,11 @@ import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 
 config();
-console.log(join(__dirname, '..', 'uploads'));
+
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: resolve('C:\\Users\\Admin\\OneDrive\\Desktop\\code\\new_project\\server\\uploads', '..', 'uploads'),
-      // rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
       serveStaticOptions: {
         index: false,  
