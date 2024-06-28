@@ -1,52 +1,41 @@
 import React, { useState } from "react";
 import { Card, Button, Row, Col, Carousel } from "antd";
-import { DeleteOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined } from "@ant-design/icons";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { ProductDetail } from "./product.type";
 
 const { Meta } = Card;
 
-interface ProductCardProps {
-  productDentail: ProductDetail;
-}
-
-const ProductCard: React.FC<ProductCardProps> = ({ productDentail }) => {
-  const router = useRouter()
-  
+const ProductCard = ({ productDentail }: any) => {
+//  const [test,setTest] = useState()
+    productDentail.imageUrl.map((img: any) => (
+      console.log(img.imageUrl)
+    ))
   return (
-    <div className="mb-5">
-      <Card
-        hoverable
-        onClick={()=> {router.push(`product/${productDentail.productId}`)}}
-        style={{ width: 300, height: "100%" }}
-        className=" border-2 border-gray-300 rounded-lg"
-        cover={
-          // <img/>
-          productDentail.imageUrl &&
-          productDentail.imageUrl
-            .filter((img: any) => img.imageType === "thumbnail")
-            .map((img: any) => (
-              <div
-                key={img.imageId}
-                className="flex justify-center items-center h-full p-2"
-              >
-                <img
-                  src={`${process.env.NEXT_PUBLIC_SERVER_URL}/${img.imageUrl}`}
-                  alt={`Product Image ${img.imageId}`}
-                  className="max-w-full h-72 object-cover transition-transform duration-300 transform hover:scale-105"
-                />
-              </div>
-            ))
-        }
-        actions={[<DeleteOutlined
-          onClick={()=>{console.log('th')}} 
-          key={'delete'}/>]}
-      >
-        <Meta
-          title={productDentail.name}
-          description={productDentail.typeName}
-        />
+    <div>
+      <Card hoverable className="mb-5">
+        <Row>
+          <Col span={6}>
+            <Carousel autoplay>
+              {productDentail.imageUrl &&
+                productDentail.imageUrl.map((img: any) => (
+                  <Image
+                    key={img.imageId}
+                    src={`http://localhost:4050/${img.imageUrl}`} // Đảm bảo đường dẫn đúng với cấu trúc thư mục của bạn
+                    alt={`Product Image ${img.imageId}`}
+                    width={500} // Thay đổi kích thước phù hợp với yêu cầu của bạn
+                    height={500} // Thay đổi kích thước phù hợp với yêu cầu của bạn
+                    layout="responsive" // Tùy chọn layout, có thể là "fixed", "intrinsic", "responsive", hoặc "fill"
+                  />
+                ))}
+            </Carousel>
+          </Col>
+          <Col span={18}>
+            <Meta
+              title={productDentail.location}
+              description="This is the description"
+            />
+          </Col>
+        </Row>
       </Card>
     </div>
   );
