@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Res,
   UploadedFile,
   UseGuards,
@@ -21,8 +22,7 @@ import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SERVER_ERROR_MESSAGE } from 'src/libs/constants';
 import { storageConfig } from 'helpers/config';
-import { UpdateProductDto } from './dto/updatePeoduct.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { UpdateProductDto } from './dto/updateProduct.dto';
 import { Public } from 'src/libs/decorators/public.decorators';
 import { CurrentUser } from 'src/libs/decorators/current-user.decorator';
 
@@ -49,6 +49,7 @@ export class ProductController {
     }
   }
 
+  @Public()
   @Post('upload-img/:productId')
   @UseInterceptors(
     FileInterceptor('imageUrl', {
@@ -78,6 +79,7 @@ export class ProductController {
     }
   }
 
+  @Public()
   @Post('upload-titleImg/:productId')
   @UseInterceptors(
     FileInterceptor('imageUrl', {
@@ -101,22 +103,27 @@ export class ProductController {
     } catch (error) {
       console.log(error);
       return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+      .status(HttpStatus.BAD_REQUEST)
+      .send(ResponseObject.fail(error.response.message));
     }
   }
 
   @Public()
   @Get()
-  async getAllProduct(@Res() res: Response) {
+  async getAllProduct(
+    @Res() res: Response,
+    @Query('delFlag') delFlag: string,
+    @CurrentUser('userId') currentUserId,
+  ) {
     try {
-      const result = await this.productService.getAllProduct();
+      const delFlagValue = delFlag === 'true';
+      const result = await this.productService.getAllProduct(delFlagValue,currentUserId);
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
       return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+      .status(HttpStatus.BAD_REQUEST)
+      .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -136,8 +143,8 @@ export class ProductController {
     } catch (error) {
       console.log(error);
       return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+      .status(HttpStatus.BAD_REQUEST)
+      .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -145,24 +152,21 @@ export class ProductController {
   async updateProductById(
     @Res() res: Response,
     @Param('productId') productId: number,
+    @CurrentUser('userId') currentUserId,
     @Body() updateProductDto: UpdateProductDto,
   ) {
     try {
       const result = await this.productService.updateProductById(
+        currentUserId,
         productId,
         updateProductDto,
       );
-      if (!result) {
-        return res
-          .status(HttpStatus.NOT_FOUND)
-          .send(ResponseObject.fail('User not found'));
-      }
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
       return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+      .status(HttpStatus.BAD_REQUEST)
+      .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -183,19 +187,57 @@ export class ProductController {
     }
   }
 
-  @Delete(':productId')
-  async deleteProduct(
+  @Delete('remove/:productId')
+  async reomoveProduct(
     @Res() res: Response,
     @Param('productId') productId: any,
+    @CurrentUser('userId') currentUserId,
+
   ) {
     try {
-      await this.productService.deleteProduct(productId);
+      await this.productService.removeProduct(currentUserId, productId);
+      return res.send(ResponseObject.success('Product remove successfully'));
+    } catch (error) {
+      console.log(error);
+      return res
+      .status(HttpStatus.BAD_REQUEST)
+      .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
+  @Put('rollback/:productId')
+  async rollBackProductByAdmin(
+    @Res() res: Response,
+    @Param('productId') productId: any,
+    @CurrentUser('userId') currentUserId,
+
+  ) {
+    try {
+      await this.productService.rollBackProductByAdmin(currentUserId, productId);
+      return res.send(ResponseObject.success('Product rollback successfully'));
+    } catch (error) {
+      console.log(error);
+      return res
+      .status(HttpStatus.BAD_REQUEST)
+      .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
+  @Delete('delete/:productId')
+  async deleteProductByAdmin(
+    @Res() res: Response,
+    @Param('productId') productId: any,
+    @CurrentUser('userId') currentUserId,
+
+  ) {
+    try {
+      await this.productService.deleteProduct(currentUserId, productId);
       return res.send(ResponseObject.success('Product deleted successfully'));
     } catch (error) {
       console.log(error);
       return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+      .status(HttpStatus.BAD_REQUEST)
+      .send(ResponseObject.fail(error.response.message));
     }
   }
 }

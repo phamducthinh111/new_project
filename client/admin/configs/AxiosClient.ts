@@ -14,16 +14,16 @@ const axiosClient = axios.create({
 });
 
 class SessionToken {
-  private token = ''
+  private token = '';
   get value() {
-    return this.token
+    return this.token;
   }
   set value(token: any) {
-    this.token = token
+    this.token = token;
   }
 }
 
-export const sessionToken = new SessionToken()
+export const sessionToken = new SessionToken();
 
 // Interceptor để thêm token vào headers
 axiosClient.interceptors.request.use(
@@ -67,7 +67,6 @@ axiosClient.interceptors.response.use(
   }
 );
 
-
 // Xử lý lỗi từ phản hồi AxiosError
 const handleAxiosError = (error: AxiosError) => {
   console.error(error);
@@ -80,16 +79,26 @@ const sendRequest = async (
   url: string,
   options?: CustomOptions
 ) => {
-  const body = options?.body ? JSON.stringify(options.body) : undefined;
-  const baseHeaders = {
-    "Content-Type": "application/json",
+  let body;
+  const headers = {
+    ...options?.headers,
   };
 
-  const baseUrl = options?.baseUrl === undefined
-    ? process.env.NEXT_PUBLIC_SERVER_URL
-    : (options.baseUrl === '' ? window.location.origin : options.baseUrl);
+  if (options?.body instanceof FormData) {
+    body = options.body;
+  } else {
+    body = options?.body ? JSON.stringify(options.body) : undefined;
+    headers['Content-Type'] = 'application/json';
+  }
 
-  const fullUrl = url.startsWith("/") ? `${baseUrl}${url}` : `${url}`;
+  const baseUrl =
+    options?.baseUrl === undefined
+      ? process.env.NEXT_PUBLIC_SERVER_URL
+      : options.baseUrl === ''
+      ? window.location.origin
+      : options.baseUrl;
+
+  const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${url}`;
 
   try {
     const response = await axiosClient.request({
@@ -97,16 +106,14 @@ const sendRequest = async (
       method,
       url: fullUrl,
       data: body,
-      headers: {
-        ...baseHeaders,
-        ...(options?.headers || {}),
-      },
+      headers,
     });
     return response.data;
   } catch (error: any) {
     handleAxiosError(error);
   }
 };
+
 
 // Định nghĩa CustomOptions
 interface CustomOptions {
@@ -120,6 +127,7 @@ export const http = {
   post: (url: string, options?: CustomOptions) => sendRequest('POST', url, options),
   put: (url: string, options?: CustomOptions) => sendRequest('PUT', url, options),
   delete: (url: string, options?: CustomOptions) => sendRequest('DELETE', url, options),
+  upload: (url: string, formData: FormData, options?: CustomOptions) => sendRequest('POST', url, { ...options, body: formData }),
 };
 
-export default http
+export default http;

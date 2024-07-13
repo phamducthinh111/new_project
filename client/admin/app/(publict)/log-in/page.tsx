@@ -132,14 +132,14 @@ const Login = () => {
               Log in
             </Button>
           </Form.Item>
-          <div className="text-center">
+          {/* <div className="text-center">
             <p>
               Don't have an account?{" "}
               <Link className="text-blue-700" href="/register">
                 Register now!
               </Link>
             </p>
-          </div>
+          </div> */}
         </Form>
       </div>
     </div>

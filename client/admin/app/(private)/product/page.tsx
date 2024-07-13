@@ -10,6 +10,10 @@ import { ProductDetail } from "./_components/product.type";
 
 export default function Product() {
   const [productData, setProductData] = useState<ProductDetail[]>([]);
+  const [refreshData, setRefreshData] = useState(false);
+  const activeProduct = true;
+
+  
   // const { mutate, isLoading } = useMutation(getAllProduct, {
   //   onSuccess: (response) => {
   //     setProductData(response);
@@ -25,11 +29,11 @@ export default function Product() {
       const response = await getAllProduct();
       if (response) {
         setProductData(response);
-        // setRefreshData(false);
+        setRefreshData(false);
       }
     };
     fetchData();
-  }, []);
+  }, [refreshData]);
 
   return (
     <div className="mt-5">
@@ -37,7 +41,7 @@ export default function Product() {
         {productData &&
           productData.map((product: any, index: number) => (
             <Col span={8} key={index} className="p-2">
-              <ProductCard productDentail={product} />
+              <ProductCard productDentail={product} refreshData={()=>setRefreshData(true)} />
             </Col>
           ))}
       </Row>

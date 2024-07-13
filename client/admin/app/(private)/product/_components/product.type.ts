@@ -22,4 +22,16 @@ export interface ProductDetail {
     updateDate?: string;
     updateUser?: string;
   }
+
+  export interface ProductContent {
+    name?: string;
+    typeName?: string;
+    description?: string;
+    discount?: number | null;
+    label?: string;
+    location?: string;
+    price?: number;
+    quantity?: number;
+    rating?: number | null;
+  }
   

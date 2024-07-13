@@ -3,18 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateProductDto } from './dto/createProduct.dto';
 import { Product } from 'src/entity/products.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Image } from 'src/entity/images.entity';
-import { UpdateProductDto } from './dto/updatePeoduct.dto';
 import { validate } from 'class-validator';
 import { User } from 'src/entity';
 import { UserService } from 'src/user/user.service';
 import { Role } from 'src/libs/decorators/role.enum';
+import { CreateProductDto, UpdateProductDto } from './dto';
 
 @Injectable()
 export class ProductService {
@@ -93,19 +92,24 @@ export class ProductService {
         `Account doesn't have permission to create Product`,
       );
     }
+
     const findProduct = await this.productRepository.findOne({
       where: { productId },
       relations: ['imageUrl'],
     });
 
     if (!findProduct) {
-      throw new NotFoundException(`Product with id ${findProduct} not found`);
+      throw new NotFoundException(`Product with id ${productId} not found`);
     }
 
+    // Tìm ảnh thumbnail hiện có và xóa nó nếu tồn tại
     const existingThumbnail = findProduct.imageUrl.find(
       (image) => image.imageType === 'thumbnail',
     );
     if (existingThumbnail) {
+      findProduct.imageUrl = findProduct.imageUrl.filter(
+        (image) => image.imageType !== 'thumbnail',
+      );
       await this.ImageRepository.remove(existingThumbnail);
     }
 
@@ -118,10 +122,20 @@ export class ProductService {
     return await this.productRepository.save(findProduct);
   }
 
-  async getAllProduct() {
+  async getAllProduct(delFlag: boolean,currentUserId: number) {
+    const findUser = await this.usersService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
+
+    if (delFlag && findUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to view deleted users`);
+    }
+
     return await this.productRepository.find({
       relations: ['imageUrl'],
       select: ['productId', 'typeName', 'name'],
+      where: {delFlag}
     });
   }
 
@@ -133,9 +147,14 @@ export class ProductService {
   }
 
   async updateProductById(
+    currentUserId,
     productId: number,
     updateProductDto: UpdateProductDto,
   ) {
+    const findUser = await this.usersService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
     const findProduct = await this.productRepository.findOne({
       where: { productId },
     });
@@ -144,12 +163,16 @@ export class ProductService {
     }
     findProduct.name = updateProductDto.name ?? findProduct.name;
     findProduct.quantity = updateProductDto.quantity ?? findProduct.quantity;
-    findProduct.description = updateProductDto.desc ?? findProduct.description;
+    findProduct.description = updateProductDto.description ?? findProduct.description;
     findProduct.price = updateProductDto.price ?? findProduct.price;
-    findProduct.typeName = updateProductDto.type ?? findProduct.typeName;
-    findProduct.location = updateProductDto.loc ?? findProduct.location;
+    findProduct.typeName = updateProductDto.typeName ?? findProduct.typeName;
+    findProduct.location = updateProductDto.location ?? findProduct.location;
+    findProduct.label = updateProductDto.label ?? findProduct.label;
+    findProduct.updateDate = new Date();
+    findProduct.updateUser = findUser.username;
 
-    return await this.productRepository.update(productId, findProduct);
+    await this.productRepository.update(productId, findProduct);
+    return findProduct;
   }
 
   async deletedImages(productId: number, imageId: any) {
@@ -180,7 +203,53 @@ export class ProductService {
     await this.ImageRepository.remove(findImage);
   }
 
-  async deleteProduct(productId: number) {
+  async removeProduct(currentUserId, productId: number) {
+    const findUser = await this.usersService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
+    const findProduct = await this.productRepository.findOne({
+      where: { productId },
+    });
+
+    if (!findProduct) {
+      throw new NotFoundException(`Product with id ${productId} not found`);
+    }
+
+    findProduct.delFlag = true;
+    findProduct.updateUser = findUser.username;
+    findProduct.updateDate = new Date();
+    await this.productRepository.update(productId, findProduct);
+  }
+
+  async rollBackProductByAdmin(currentUserId, productId: number) {
+    const findUser = await this.usersService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
+    const findProduct = await this.productRepository.findOne({
+      where: { productId },
+    });
+
+    if (!findProduct) {
+      throw new NotFoundException(`Product with id ${productId} not found`);
+    }
+
+    if (findUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to Rollback`);
+    }
+
+    findProduct.delFlag = false;
+    findProduct.updateUser = findUser.username;
+    findProduct.updateDate = new Date();
+    await this.productRepository.update(productId, findProduct);
+  }
+
+  async deleteProduct(currentUserId, productId: number) {
+    const findUser = await this.usersService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
     const findProduct = await this.productRepository.findOne({
       where: { productId },
       relations: ['imageUrl'],
@@ -188,6 +257,10 @@ export class ProductService {
 
     if (!findProduct) {
       throw new NotFoundException(`Product with id ${productId} not found`);
+    }
+
+    if (findUser.role !== Role.admin) {
+      throw new NotFoundException(`Account doesn't have permission to delete`);
     }
 
     if (findProduct.imageUrl && findProduct.imageUrl.length > 0) {
