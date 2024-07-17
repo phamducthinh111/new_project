@@ -164,26 +164,45 @@ export class UserControler {
     }
   }
 
+  @Public()
+  @Get('search')
+  async getSearchSuggestions(
+    @Res() res: Response,
+    @Query('username') username: string,
+    @Query('delFlag') delFlag?: string,
+  ) {
+    console.log(username)
+    // try {
+    //   console.log(username)
+    //   const delFlagValue = delFlag === 'true' ? true : false;
+    //   const result = await this.userService.getSearchSuggestions(username, delFlagValue);
+    //   return res.send(ResponseObject.success(result));
+    // } catch (error) {
+    //   console.log(error);
+    //   return res
+    //     .status(HttpStatus.BAD_REQUEST)
+    //     .send(ResponseObject.fail(error.response.message));
+    // }
+  }
+
   @Get()
   async getAllUsers(
     @Res() res: Response,
-    @Query('delFlag') delFlag: string,
-    @CurrentUser('userId') currentUserId,
+    @CurrentUser('userId') currentUserId: number,
+    @Query('delFlag') delFlag?: string,
+    @Query('username') username?: string,
+    @Query('role') role?: Role,
+
   ) {
     try{
       const delFlagValue = delFlag === 'true';
-      const result = await this.userService.getAllUsers(delFlagValue,currentUserId);
-      if (!result) {
-        return res
-          .status(HttpStatus.NOT_FOUND)
-          .send(ResponseObject.fail('User not found'));
-      }
+      const result = await this.userService.getAllUsers(currentUserId,username,role,delFlagValue);
       return  res.send(ResponseObject.success(result))
     } catch (error) {
       console.log(error);
       return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(ResponseObject.fail(SERVER_ERROR_MESSAGE));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
   // manager ,admin

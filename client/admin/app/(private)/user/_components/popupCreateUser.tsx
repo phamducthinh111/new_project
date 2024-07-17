@@ -22,7 +22,7 @@ import { useAppContetxt } from "@/app/AppProvider";
 
 interface CreateUserFormProps {
   form: FormInstance<CreateEmpForm>;
-  onFieldsChange: any;
+  onFieldsChange: () => void;
   isPopupCreate: boolean;
   currentUser?: ListUser;
 }

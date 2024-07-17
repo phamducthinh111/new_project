@@ -2,6 +2,7 @@
 
 import Loading from "@/components/loading/loading";
 import {
+  AutoComplete,
   Button,
   Col,
   Input,
@@ -13,7 +14,7 @@ import {
   message,
 } from "antd";
 import { ChangeEvent, useEffect, useState } from "react";
-import { ListUser, roleOptions } from "../_components/user.type";
+import { ListUser, Role, roleOptions } from "../_components/user.type";
 import { useMutation } from "react-query";
 import { deleteUser, getAllUser, rollbackUser } from "@/api/user";
 import {
@@ -30,36 +31,70 @@ export default function UsersDeleted() {
   const [isOpenPopup, setIsOpenPopup] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<ListUser>();
   const [isPopupRollback, setIsPopupRollback] = useState<boolean>(false);
-  const [selectedRole, setSelectedRole] = useState<string | undefined>(
-    undefined
-  );
+  const [suggestions, setSuggestions] = useState<ListUser[]>([]);
+  const [selectedRole, setSelectedRole] = useState<Role>();
+  const [isLoading, setIsLoading] = useState(false);
+
   const activeUsers = true;
-  const { mutate, isLoading } = useMutation(getAllUser, {
-    onSuccess: (response) => {
-      response.sort((a: any, b: any) => {
-        const dateA = new Date(a.updateDate);
-        const dateB = new Date(b.updateDate);
-        return dateB.getTime() - dateA.getTime();
-      });
-      setUserData(response);
-      setRefreshData(false);
-    },
-    onError: (error) => {
-      message.error("Failed to fetch users");
-      console.error(error);
-    },
-  });
+  // const { mutate, isLoading } = useMutation(getAllUser, {
+  //   onSuccess: (response) => {
+  //     response.sort((a: any, b: any) => {
+  //       const dateA = new Date(a.updateDate);
+  //       const dateB = new Date(b.updateDate);
+  //       return dateB.getTime() - dateA.getTime();
+  //     });
+  //     setUserData(response);
+  //     setRefreshData(false);
+  //   },
+  //   onError: (error) => {
+  //     message.error("Failed to fetch users");
+  //     console.error(error);
+  //   },
+  // });
 
   useEffect(() => {
-    mutate(activeUsers);
-  }, [refreshData]);
+    // mutate(searchValue, selectedRole);
+    const fetchData = async () => {
+      setIsLoading(true)
+      const response = await getAllUser(searchValue, selectedRole ,activeUsers);
+      if (response) {
+        response.sort((a: any, b: any) => {
+          if (a.role === Role.admin) return -1;
+          if (b.role === Role.admin) return 1;
+          const dateA = new Date(a.updateDate);
+          const dateB = new Date(b.updateDate);
+          return dateB.getTime() - dateA.getTime();
+        });
+        setUserData(response);
+        setRefreshData(false);
+      }
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [refreshData, searchValue, selectedRole]);
 
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
+  const handleSearchChange = async (value: string) => {
+    setSearchValue(value);
+    if (value) {
+      const response = await getAllUser(value, undefined, activeUsers);
+      if (response) {
+        setSuggestions(response);
+      }
+    } else {
+      setSuggestions([]);
+    }
   };
 
-  const handleRoleChange = (value: string) => {
+  const handleRoleChange = async (value: Role) => {
     setSelectedRole(value);
+    if (value) {
+      const response = await getAllUser(undefined, value, activeUsers);
+      if (response) {
+        setSuggestions(response);
+      }
+    } else {
+      setSuggestions([]);
+    }
   };
 
   const filteredData = userData.filter(
@@ -218,11 +253,14 @@ export default function UsersDeleted() {
     <div className="mt-5">
       <Row justify="end" className="mb-5" gutter={[16, 16]}>
         <Col xs={24} sm={12} md={8} lg={6} xl={6}>
-          <Input.Search
-            placeholder="Search by username"
-            value={searchValue}
-            onChange={handleSearchChange}
-          />
+        <AutoComplete
+            style={{ width: 300}}
+            onSearch={handleSearchChange}
+            options={suggestions.map((item) => ({ value: item.username }))}
+            onSelect={(value) => setSearchValue(value)}
+          >
+            <Input.Search placeholder="Search by username" />
+          </AutoComplete>
         </Col>
         <Col xs={24} sm={12} md={8} lg={6} xl={6}>
           <Select

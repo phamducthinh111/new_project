@@ -30,3 +30,27 @@ export const errorMessages = {
     required: "Please select your Role!",
   }
 };
+
+export const errorProductMessages = {
+  name: {
+    required: "Please input Product Name!",
+  },
+  quantity: {
+    required: "Please input Product Quantity!",
+  },
+  desc: {
+    required: "Please input Product Description!",
+  },
+  price: {
+    required: "Please input Product Price!",
+  },
+  type: {
+    required: "Please input Product Type!",
+  },
+  loc: {
+    required: "Please input Product Location!",
+  },
+  label: {
+    required: "Please input Product Label!",
+  },
+}

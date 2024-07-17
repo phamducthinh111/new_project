@@ -31,11 +31,14 @@ import {
 } from "@ant-design/icons";
 import ModalAlert from "@/components/AlertModal/AlertModal";
 import ImgCrop from "antd-img-crop";
+import { useAppContetxt } from "@/app/AppProvider";
+import { Role } from "../../user/_components/user.type";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 export default function Product({ params }: any) {
+  const { userProfile } = useAppContetxt();
   const [productDentail, setProductDentail] = useState<ProductDetail | null>(
     null
   );
@@ -331,6 +334,32 @@ export default function Product({ params }: any) {
                 <Form.Item label="Description" name="description">
                   <TextArea rows={4} />
                 </Form.Item>
+                {userProfile && userProfile?.role === Role.admin || userProfile?.role === Role.manager ? (
+                  <div className="mt-5 text-gray-500 italic text-right w-full">
+                    <Text>CreateUser: {productDentail.createUser}</Text>
+                    <br />
+                    <Text>UpdateUser: {productDentail.updateUser}</Text>
+                    <br />
+                    <Text>
+                      CreateDate:{" "}
+                      {productDentail.createDate
+                        ? new Date(
+                            productDentail.createDate
+                          ).toLocaleString()
+                        : "N/A"}
+                    </Text>
+                    <br />
+                    <Text>
+                      UpdateDate:{" "}
+                      {productDentail.updateDate
+                        ? new Date(
+                            productDentail.updateDate
+                          ).toLocaleString()
+                        : "N/A"}
+                    </Text>
+                  </div>
+                ) : null}
+
                 <Button type="primary" onClick={handleSaveClick}>
                   Save
                 </Button>
@@ -439,12 +468,6 @@ export default function Product({ params }: any) {
             }
           />
         </div>
-        {/* <div className="mt-5 text-gray-500 italic">
-          <Text>CreateUser: {productDentail.createUser}</Text><br />
-          <Text>UpdateUser: {productDentail.updateUser}</Text><br />
-          <Text>CreateDate: {new Date(productDentail.createDate).toLocaleDateString()}</Text><br />
-          <Text>UpdateDate: {new Date(productDentail.updateDate).toLocaleDateString()}</Text>
-        </div> */}
         <ModalAlert
           title="Delete Image"
           visible={isOpenDelPopup}

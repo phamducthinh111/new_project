@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ImageUrl, ProductDetail } from "./product.type";
 import ModalAlert from "@/components/AlertModal/AlertModal";
-import { deleteProduct } from "@/api/product";
+import { removeProduct } from "@/api/product";
 
 const { Meta } = Card;
 
@@ -25,7 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ productDentail, refreshData }
 
   const handleOkDeleteProduct = async () => {
     try {
-      const response = await deleteProduct(
+      const response = await removeProduct(
         productDentail.productId
       );
       if (response) {

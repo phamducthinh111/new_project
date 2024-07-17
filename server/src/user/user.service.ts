@@ -1,10 +1,20 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Role } from 'src/libs/decorators/role.enum';
-import { CreateUserDto, PasswordProfileDto, UpdateRoleDto, UpdateUserDto } from './dto';
+import {
+  CreateUserDto,
+  PasswordProfileDto,
+  UpdateRoleDto,
+  UpdateUserDto,
+} from './dto';
+import { query } from 'express';
 
 @Injectable()
 export class UserService {
@@ -116,7 +126,10 @@ export class UserService {
     return findUser;
   }
 
-  async changePasswordById(passwordProfileDto: PasswordProfileDto, currentUserId: number) {
+  async changePasswordById(
+    passwordProfileDto: PasswordProfileDto,
+    currentUserId: number,
+  ) {
     const findUser = await this.userRepository.findOne({
       where: { userId: currentUserId },
     });
@@ -130,8 +143,11 @@ export class UserService {
     if (!passwordMatches) {
       throw new NotFoundException('Password is incorrect');
     }
-    const hashedPassword = await bcrypt.hash(passwordProfileDto.newPassword, 10);
-    findUser.password = hashedPassword
+    const hashedPassword = await bcrypt.hash(
+      passwordProfileDto.newPassword,
+      10,
+    );
+    findUser.password = hashedPassword;
     await this.userRepository.update(currentUserId, findUser);
     return findUser;
   }
@@ -145,7 +161,8 @@ export class UserService {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
     if (
-      findCurrenUser.role === Role.admin || findCurrenUser.role === Role.manager
+      findCurrenUser.role === Role.admin ||
+      findCurrenUser.role === Role.manager
     ) {
       findUser.delFlag = true;
       findUser.updateUser = findCurrenUser.username;
@@ -171,7 +188,9 @@ export class UserService {
   }
 
   async rollBackUserByAdmin(userId: number, currentUserId: number) {
-    const findUser = await this.userRepository.findOne({ where: { userId, delFlag: true } });
+    const findUser = await this.userRepository.findOne({
+      where: { userId, delFlag: true },
+    });
     const findCurrenUser = await this.userRepository.findOne({
       where: { userId: currentUserId },
     });
@@ -179,7 +198,9 @@ export class UserService {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
     if (findCurrenUser.role !== Role.admin) {
-      throw new NotFoundException(`Account doesn't have permission to Rollback`);
+      throw new NotFoundException(
+        `Account doesn't have permission to Rollback`,
+      );
     }
     findUser.updateUser = findCurrenUser.username;
     findUser.updateDate = new Date();
@@ -188,23 +209,59 @@ export class UserService {
     return result;
   }
 
-  async getAllUsers(delFlag: boolean,currentUserId: number) {
+  async getAllUsers(
+    currentUserId: number,
+    username?: string,
+    role?: Role,
+    delFlag?: boolean,
+  ) {
     const findCurrenUser = await this.userRepository.findOne({
       where: { userId: currentUserId },
     });
     if (!findCurrenUser) {
       throw new NotFoundException('Current user not found');
     }
-
+  
     if (delFlag && findCurrenUser.role !== Role.admin) {
-      throw new NotFoundException(`Account doesn't have permission to view deleted users`);
+      throw new NotFoundException(
+        `Account doesn't have permission to view deleted users`,
+      );
     }
-    return await this.userRepository.find({
-      where: {delFlag},
-    })
+  
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+  
+    // Thêm điều kiện delFlag
+    if (delFlag !== undefined) {
+      queryBuilder.andWhere('user.delFlag = :delFlag', { delFlag });
+    }
+  
+    // Thêm điều kiện tìm kiếm theo username nếu có
+    if (username) {
+      queryBuilder.andWhere('LOWER(user.username) LIKE LOWER(:username)', {
+        username: `%${username}%`,
+      });
+    }
+  
+    // Thêm điều kiện tìm kiếm theo role nếu có
+    if (role) {
+      queryBuilder.andWhere('user.role = :role', { role });
+    }
+  
+    // Lấy tối đa 10 kết quả nếu có điều kiện tìm kiếm
+    if (username) {
+      queryBuilder.take(10);
+    }
+  
+    const result = await queryBuilder.getMany();
+    return result;
   }
 
-  async updateRoleByAdmin(userId: number, currentUserId:number, updateRoleDto:UpdateRoleDto) {
+
+  async updateRoleByAdmin(
+    userId: number,
+    currentUserId: number,
+    updateRoleDto: UpdateRoleDto,
+  ) {
     const findUser = await this.userRepository.findOne({ where: { userId } });
     if (!findUser) {
       throw new NotFoundException(`User with id ${userId} not found`);
@@ -212,14 +269,15 @@ export class UserService {
     const findCurrenUser = await this.userRepository.findOne({
       where: { userId: currentUserId },
     });
-    if(findCurrenUser.role !== Role.admin) {
-      throw new NotFoundException(`Account doesn't have permission to update Role`); 
+    if (findCurrenUser.role !== Role.admin) {
+      throw new NotFoundException(
+        `Account doesn't have permission to update Role`,
+      );
     }
     findUser.role = updateRoleDto.role ?? findUser.role;
     findUser.updateUser = findCurrenUser.username;
     findUser.updateDate = new Date();
-    const result = await this.userRepository.update(userId, findUser) 
+    const result = await this.userRepository.update(userId, findUser);
     return result;
   }
-
 }

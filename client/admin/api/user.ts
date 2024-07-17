@@ -1,11 +1,13 @@
 import { UserProfile } from "@/app/(private)/profile/_components/profile.type";
-import { CreateEmpForm } from "@/app/(private)/user/_components/user.type";
+import { CreateEmpForm, Role } from "@/app/(private)/user/_components/user.type";
 import http from "@/configs/AxiosClient";
 
 
-export const getAllUser = async (delFlag? :boolean) => {
+export const getAllUser = async (username?: string, role?: Role, delFlag? :boolean) => {
     const response = await http.get("users", {
       params: {
+        username: username,
+        role: role,
         delFlag: delFlag
     }
     });

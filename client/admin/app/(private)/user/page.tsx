@@ -3,6 +3,7 @@
 import { createEmp, getAllUser, removeUser, updateRoleEmp } from "@/api/user";
 import { useAppContetxt } from "@/app/AppProvider";
 import {
+  AutoComplete,
   Button,
   Col,
   Form,
@@ -38,64 +39,78 @@ export default function User() {
   const [userData, setUserData] = useState<ListUser[]>([]);
   const [refreshData, setRefreshData] = useState(false);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [selectedRole, setSelectedRole] = useState<string | undefined>(
-    undefined
-  );
+  const [suggestions, setSuggestions] = useState<ListUser[]>([]);
+  const [selectedRole, setSelectedRole] = useState<Role>();
   const [form] = Form.useForm();
   const [isPopupCreate, setisPopupCreate] = useState<boolean>(false);
   const [isOpenPopup, setIsOpenPopup] = useState<boolean>(false);
   const [isOpenDelPopup, setIsOpenDelPopup] = useState<boolean>(false);
   const [isDisabledCreate, setIsDisabledCreate] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<ListUser>();
+  const [isLoading, setIsLoading] = useState(false);
   const activeUsers = false;
-  const { mutate, isLoading } = useMutation(getAllUser, {
-    onSuccess: (response) => {
-      response.sort((a: any, b: any) => {
-        if (a.role === Role.admin) return -1;
-        if (b.role === Role.admin) return 1;
-        const dateA = new Date(a.updateDate);
-        const dateB = new Date(b.updateDate);
-        return dateB.getTime() - dateA.getTime();
-      });
-      setUserData(response);
-      setRefreshData(false);
-    },
-    onError: (error) => {
-      message.error("Failed to fetch users");
-      console.error(error);
-    },
-  });
+  // const { mutate, isLoading } = useMutation(getAllUser, {
+  //   onSuccess: (response) => {
+  //     response.sort((a: any, b: any) => {
+  //       if (a.role === Role.admin) return -1;
+  //       if (b.role === Role.admin) return 1;
+  //       const dateA = new Date(a.updateDate);
+  //       const dateB = new Date(b.updateDate);
+  //       return dateB.getTime() - dateA.getTime();
+  //     });
+  //     setUserData(response);
+  //     setRefreshData(false);
+  //   },
+  //   onError: (error) => {
+  //     message.error("Failed to fetch users");
+  //     console.error(error);
+  //   },
+  // });
 
   useEffect(() => {
-    mutate(activeUsers);
-    // const fetchData = async () => {
-    //   const response = await getAllUser();
-    //   if (response) {
-    //     response.sort((a: any, b: any) => {
-    //       if (a.username === "admin") return -1;
-    //       if (b.username === "admin") return 1;
-    //       return 0;
-    //     });
-    //     setUserData(response);
-    //     setRefreshData(false);
-    //   }
-    // };
-    // fetchData();
-  }, [refreshData]);
+    // mutate(searchValue, selectedRole);
+    const fetchData = async () => {
+      setIsLoading(true)
+      const response = await getAllUser(searchValue, selectedRole);
+      if (response) {
+        response.sort((a: any, b: any) => {
+          if (a.role === Role.admin) return -1;
+          if (b.role === Role.admin) return 1;
+          const dateA = new Date(a.updateDate);
+          const dateB = new Date(b.updateDate);
+          return dateB.getTime() - dateA.getTime();
+        });
+        setUserData(response);
+        setRefreshData(false);
+      }
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [refreshData, searchValue, selectedRole]);
 
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
+  const handleSearchChange = async (value: string) => {
+    setSearchValue(value);
+    if (value) {
+      const response = await getAllUser(value);
+      if (response) {
+        setSuggestions(response);
+      }
+    } else {
+      setSuggestions([]);
+    }
   };
 
-  const handleRoleChange = (value: string) => {
+  const handleRoleChange = async (value: Role) => {
     setSelectedRole(value);
+    if (value) {
+      const response = await getAllUser(undefined, value);
+      if (response) {
+        setSuggestions(response);
+      }
+    } else {
+      setSuggestions([]);
+    }
   };
-
-  const filteredData = userData.filter(
-    (user) =>
-      user.username.toLowerCase().includes(searchValue.toLowerCase()) &&
-      (!selectedRole || user.role === selectedRole)
-  );
 
   /// create account
   const onBtnCreate = () => {
@@ -341,11 +356,19 @@ export default function User() {
     <div className="mt-5">
       <Row justify="end" className="mb-5" gutter={[16, 16]}>
         <Col xs={24} sm={12} md={4} lg={4} xl={4}>
-          <Input.Search
+          {/* <Input.Search
             placeholder="Search by username"
             value={searchValue}
             onChange={handleSearchChange}
-          />
+          /> */}
+            <AutoComplete
+            // style={{ width: 300, marginBottom: 20 }}
+            onSearch={handleSearchChange}
+            options={suggestions.map((item) => ({ value: item.username }))}
+            onSelect={(value) => setSearchValue(value)}
+          >
+            <Input.Search placeholder="Search by username" />
+          </AutoComplete>
         </Col>
         <Col xs={24} sm={12} md={4} lg={4} xl={4}>
           <Select
@@ -369,7 +392,7 @@ export default function User() {
       {isLoading ? (
         <Loading />
       ) : (
-        <Table columns={columns} dataSource={filteredData} rowKey="id" />
+        <Table columns={columns} dataSource={userData} rowKey="id" />
       )}
       <CustomModal
         title={isPopupCreate ? "Create User" : "Update User"}

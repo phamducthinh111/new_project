@@ -34,4 +34,30 @@ export interface ProductDetail {
     quantity?: number;
     rating?: number | null;
   }
+
+  export enum Type {
+    robusta = 'ROBUSTA',
+    arabica = 'ARABICA',
+    cherry = 'CHERRY',
+    culi = 'CULI'
+  }
+
+  export const typeOptions = [
+    {
+      value: "ROBUSTA",
+      label: "ROBUSTA",
+    },
+    {
+      value: "ARABICA",
+      label: "ARABICA",
+    },
+    {
+      value: "CHERRY",
+      label: "CHERRY",
+    },
+    {
+      value: "CULI",
+      label: "CULI",
+    },
+  ];
   

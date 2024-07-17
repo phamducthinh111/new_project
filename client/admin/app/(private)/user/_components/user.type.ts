@@ -1,5 +1,5 @@
 export interface ListUser {
-    userId?: string;
+    userId: string;
     username: string;
     email: string;
     phone: string;

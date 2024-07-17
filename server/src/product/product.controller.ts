@@ -109,15 +109,35 @@ export class ProductController {
   }
 
   @Public()
+  @Get('search')
+  async getSearchSuggestions(
+    @Res() res: Response,
+    @Query('name') name: string,
+    @Query('delFlag') delFlag?: string,
+  ) {
+    try {
+      const delFlagValue = delFlag === 'true' ? true : false;
+      const result = await this.productService.getSearchSuggestions(name, delFlagValue);
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
+  // @Public()
   @Get()
   async getAllProduct(
     @Res() res: Response,
-    @Query('delFlag') delFlag: string,
     @CurrentUser('userId') currentUserId,
+    @Query('name') name: string,
+    @Query('delFlag') delFlag?: string,
   ) {
     try {
       const delFlagValue = delFlag === 'true';
-      const result = await this.productService.getAllProduct(delFlagValue,currentUserId);
+      const result = await this.productService.getAllProduct(currentUserId, name, delFlagValue, );
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
