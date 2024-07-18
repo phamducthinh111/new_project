@@ -18,8 +18,7 @@ console.log(join(__dirname, '..', 'uploads'));
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: resolve('C:\\Users\\Admin\\OneDrive\\Desktop\\code\\new_project\\server\\uploads', '..', 'uploads'),
-      // rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
       serveStaticOptions: {
         index: false,  

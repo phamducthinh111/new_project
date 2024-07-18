@@ -1,9 +1,8 @@
-import { IsString, IsDate, IsNumber } from 'class-validator';
+import { IsString, IsDate, IsNumber, IsNotEmpty } from 'class-validator';
 
 export class UpdateOrderDto {
-  @IsNumber()
-  total: number;
 
+  @IsNotEmpty()
   @IsString()
   status: string;
 }

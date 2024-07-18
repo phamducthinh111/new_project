@@ -1,8 +1,7 @@
-import { IsString, IsDate, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsArray } from 'class-validator';
 
 export class CreateOrderDto {
-  @IsNumber()
-  total: number;
-
-
+  @IsArray()
+  @IsNotEmpty()
+  orderItemsData: { productId: number, quantity: number }[];
 }

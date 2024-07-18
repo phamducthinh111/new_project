@@ -11,19 +11,19 @@ import { SERVER_ERROR_MESSAGE } from "src/libs/constants";
 export class OrderItemController {
     constructor(private readonly orderItemService: OrderItemService) {}
 
-    @Post()
-    async createOrderItem(
-        @Body() createOrderItemDto: CreateOrderItemDto,
-        @Res() res: Response
-    ) {
-        try {
-            const result = await this.orderItemService.createOrderItem(createOrderItemDto);
-            return res.send(ResponseObject.success(result));
-        } catch (error) {
-            console.log(error)
-            return res
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .send(ResponseObject.fail(SERVER_ERROR_MESSAGE))
-        }
-    }
+    // @Post()
+    // async createOrderItem(
+    //     @Body() createOrderItemDto: CreateOrderItemDto,
+    //     @Res() res: Response
+    // ) {
+    //     try {
+    //         const result = await this.orderItemService.createOrderItem(createOrderItemDto);
+    //         return res.send(ResponseObject.success(result));
+    //     } catch (error) {
+    //         console.log(error)
+    //         return res
+    //                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
+    //                 .send(ResponseObject.fail(SERVER_ERROR_MESSAGE))
+    //     }
+    // }
 }

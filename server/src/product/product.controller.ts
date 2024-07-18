@@ -112,7 +112,7 @@ export class ProductController {
   @Get('search')
   async getSearchSuggestions(
     @Res() res: Response,
-    @Query('name') name: string,
+    @Query('name') name?: string,
     @Query('delFlag') delFlag?: string,
   ) {
     try {
@@ -132,7 +132,7 @@ export class ProductController {
   async getAllProduct(
     @Res() res: Response,
     @CurrentUser('userId') currentUserId,
-    @Query('name') name: string,
+    @Query('name') name?: string,
     @Query('delFlag') delFlag?: string,
   ) {
     try {
