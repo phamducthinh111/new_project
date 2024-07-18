@@ -9,10 +9,10 @@ export class Product extends Model {
     productId: number;
 
     @Column({ name: 'name' })
-    name: String;
+    name: string;
 
     @Column({ name: 'description' })
-    description: String;
+    description: string;
 
     @Column({ name: 'price' })
     price: number;
@@ -24,10 +24,10 @@ export class Product extends Model {
     imageUrl: Image[];
 
     @Column({ name: 'type_name' })
-    typeName: String;
+    typeName: string;
 
     @Column({ name: 'location' })
-    location: String;
+    location: string;
 
     @Column({ name: 'label' })
     label: string;

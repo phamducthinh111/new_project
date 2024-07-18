@@ -61,7 +61,20 @@ export class UserService {
   }
 
   async findOneById(userId: number): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { userId, delFlag: false } });
+    return this.userRepository.findOne({
+      select: {
+        email: true,
+        role: true,
+        phone: true,
+        username: true,
+        sex: true,
+        fullname: true,
+        birthday: true,
+        address: true,
+        userId: true,
+      },
+      where: { userId, delFlag: false },
+    });
   }
 
   async getUserById(userId: number) {
@@ -221,41 +234,40 @@ export class UserService {
     if (!findCurrenUser) {
       throw new NotFoundException('Current user not found');
     }
-  
+
     if (delFlag && findCurrenUser.role !== Role.admin) {
       throw new NotFoundException(
         `Account doesn't have permission to view deleted users`,
       );
     }
-  
+
     const queryBuilder = this.userRepository.createQueryBuilder('user');
-  
+
     // Thêm điều kiện delFlag
     if (delFlag !== undefined) {
       queryBuilder.andWhere('user.delFlag = :delFlag', { delFlag });
     }
-  
+
     // Thêm điều kiện tìm kiếm theo username nếu có
     if (username) {
       queryBuilder.andWhere('LOWER(user.username) LIKE LOWER(:username)', {
         username: `%${username}%`,
       });
     }
-  
+
     // Thêm điều kiện tìm kiếm theo role nếu có
     if (role) {
       queryBuilder.andWhere('user.role = :role', { role });
     }
-  
+
     // Lấy tối đa 10 kết quả nếu có điều kiện tìm kiếm
     if (username) {
       queryBuilder.take(10);
     }
-  
+
     const result = await queryBuilder.getMany();
     return result;
   }
-
 
   async updateRoleByAdmin(
     userId: number,

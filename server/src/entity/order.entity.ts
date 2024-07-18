@@ -3,24 +3,26 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 import { User } from './user.entity'; 
 import { OrderItem } from './orderItem.entity';
+import { Model } from './model.entity';
+import { OrderStatus } from 'src/libs/decorators/OrderStatus.enum';
 
 @Entity()
-export class Order {
+export class Order extends Model {
   @PrimaryGeneratedColumn({ name: 'id'})
   orderId: number;
 
-  @Column( {name: 'status'})
-  status: String;
-
-  @Column({ name : 'order_date', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  orderDate: Date;
+  @Column( {name: 'status', default: OrderStatus.Pending})
+  status: string;
 
   @Column({ name : 'total_price', default: 0})
   totalPrice: number;
 
-  @ManyToOne(() => User, (user) => user.userId)
+  @Column({ name: 'description', nullable: true })
+  desc?: string;
+
+  @ManyToOne(() => User, (user) => user.orders)
   user: User;
 
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
+  @OneToMany(() => OrderItem, orderItem => orderItem.order, { cascade: true })
   orderItems: OrderItem[];
 }

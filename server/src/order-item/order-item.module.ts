@@ -6,15 +6,20 @@ import { OrderService } from 'src/order/order.service';
 import { UserModule } from 'src/user/user.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { Order, OrderItem, Product, User } from 'src/entity';
+import { ProductService } from 'src/product/product.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([OrderItem]),
-        TypeOrmModule.forFeature([User]),
-        TypeOrmModule.forFeature([Order]),
-        TypeOrmModule.forFeature([Product]),
-        AuthModule
+    imports: [
+        TypeOrmModule.forFeature([OrderItem]),
+        // TypeOrmModule.forFeature([User]),
+        // TypeOrmModule.forFeature([Order]),
+        // TypeOrmModule.forFeature([Product]),
+        // AuthModule,
+        // UserModule,
+        // ProductService
         ],
-    providers: [OrderItemService, OrderService],
-    controllers: [OrderItemController]
+    providers: [OrderItemService],
+    controllers: [OrderItemController],
+    exports: [OrderItemService],
 })
 export class OrderItemModule {}

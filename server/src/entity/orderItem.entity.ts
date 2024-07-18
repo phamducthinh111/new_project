@@ -15,9 +15,9 @@ export class OrderItem {
   @Column()
   quantity: number;
 
-  @ManyToOne(() => Order, (order) => order.orderItems)
+  @ManyToOne(() => Order, order => order.orderItems)
   order: Order;
 
-  @ManyToOne(() => Product, (product) => product.orderItems)
+  @ManyToOne(() => Product, product => product.orderItems)
   product: Product;
 }

@@ -25,10 +25,10 @@ export class ProductService {
     private ImageRepository: Repository<Image>,
     // @InjectRepository(User)
     // private userRepository: Repository<User>
-    private usersService: UserService,
+    private userService: UserService,
   ) {}
   async createProduct(currentUserId, createProductDto: CreateProductDto) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -57,7 +57,7 @@ export class ProductService {
   }
 
   async upLoadListImage(currentUserId, productId: number, file: string) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -78,7 +78,7 @@ export class ProductService {
   }
 
   async upLoadTopicImage(currentUserId, productId: number, file: string) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -113,7 +113,7 @@ export class ProductService {
   }
 
   async getAllProduct(currentUserId: number, name?: string, delFlag?: boolean) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -138,7 +138,7 @@ export class ProductService {
         'product.updateUser',
       ])
       .leftJoinAndSelect('product.imageUrl', 'imageUrl'); // Nếu cần lấy cả imageUrl
-
+    
     // Thêm điều kiện delFlag nếu được cung cấp
     if (delFlag !== undefined) {
       queryBuilder.where('product.delFlag = :delFlag', { delFlag });
@@ -182,12 +182,27 @@ export class ProductService {
     });
   }
 
+  async findProductByIdForOrder(productId: number) {
+    return await this.productRepository.findOne({
+      select: {
+        productId : true,
+        name : true,
+        price : true,
+        imageUrl : true,
+        typeName : true,
+        label : true,
+      },
+      where: { productId },
+      relations: ['imageUrl'],
+    });
+  }
+
   async updateProductById(
     currentUserId,
     productId: number,
     updateProductDto: UpdateProductDto,
   ) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -241,7 +256,7 @@ export class ProductService {
   }
 
   async removeProduct(currentUserId, productId: number) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -260,7 +275,7 @@ export class ProductService {
   }
 
   async rollBackProductByAdmin(currentUserId, productId: number) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -285,7 +300,7 @@ export class ProductService {
   }
 
   async deleteProduct(currentUserId, productId: number) {
-    const findUser = await this.usersService.findOneById(currentUserId);
+    const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
     }
@@ -307,5 +322,10 @@ export class ProductService {
       await this.ImageRepository.delete(imageIds);
     }
     await this.productRepository.remove(findProduct);
+  }
+
+  //order
+  async updateQuantityProduct(product: Product): Promise<Product> {
+    return await this.productRepository.save(product);
   }
 }
