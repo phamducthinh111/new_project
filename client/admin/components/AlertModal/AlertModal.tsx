@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Modal, Button, Typography } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -20,6 +20,7 @@ interface ModalAlertProps {
   cancelButtonProps?: any;
   content: any;
   type?: "delete" | "warning" | "info" | "success";
+  children?: ReactNode;
 }
 
 const ModalAlert: React.FC<ModalAlertProps> = ({
@@ -33,6 +34,7 @@ const ModalAlert: React.FC<ModalAlertProps> = ({
   cancelButtonProps = {},
   content,
   type = "info",
+  children,
 }) => {
   const renderIcon = () => {
     switch (type) {
@@ -102,7 +104,8 @@ const ModalAlert: React.FC<ModalAlertProps> = ({
         <div className="flex justify-center mb-4">{renderIcon()}</div>
         <h2 className="text-2xl font-semibold mb-2">{title}</h2>
         <Text className="block mb-4 text-lg">{content}</Text>
-        <div className="flex justify-center gap-4">
+        {children}
+        <div className="flex justify-center gap-4 mt-5">
           <Button
             size="large"
             shape="round"

@@ -54,3 +54,9 @@ export const errorProductMessages = {
     required: "Please input Product Label!",
   },
 }
+
+export const errorOrderMessages = {
+  desc: {
+    required: "Please input Description!",
+  },
+}

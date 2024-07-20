@@ -26,7 +26,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 }) => {
   return (
     <Modal
-      title={<h2 className="text-lg text-center">{title}</h2>}
+      title={<h1 className="text-2xl text-center">{title}</h1>}
       visible={visible}
       onOk={onOk}
       onCancel={onCancel}
