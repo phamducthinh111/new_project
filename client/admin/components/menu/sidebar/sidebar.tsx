@@ -3,10 +3,12 @@
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
   LogoutOutlined,
   UserOutlined,
   VideoCameraOutlined,
+  HomeOutlined,
+  OrderedListOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Layout, Menu, message } from "antd";
 import { useEffect, useState } from "react";
@@ -43,7 +45,7 @@ const SideBar = () => {
       id: "home",
       title: "Home",
       path: "/dashboard",
-      icon: <VideoCameraOutlined />,
+      icon: <HomeOutlined />,
     },
     {
       id: "user",
@@ -71,7 +73,7 @@ const SideBar = () => {
       id: "product",
       title: "Product",
       path: "product",
-      icon: <VideoCameraOutlined />,
+      icon: <ShopOutlined />,
       children: [
         {
           id: "list-product",
@@ -93,7 +95,23 @@ const SideBar = () => {
       id: "order",
       title: "Order",
       path: "order",
-      icon: <VideoCameraOutlined />,
+      icon: <OrderedListOutlined />,
+      children: [
+        {
+          id: "list-Order",
+          title: "List Order",
+          path: "/order",
+        },
+        ...(userProfile?.role === Role.admin
+          ? [
+              {
+                id: "delete-Order",
+                title: "List Order Deleted",
+                path: "/order/deleted",
+              },
+            ]
+          : []),
+      ],
     },
   ];
   
@@ -140,7 +158,7 @@ const SideBar = () => {
               title={
                 <span>
                   {item.icon}
-                  <span>{item.title}</span>
+                  <span className="text-base">{item.title}</span>
                 </span>
               }
             >
@@ -155,7 +173,7 @@ const SideBar = () => {
           ) : (
             <Menu.Item key={item.id} icon={item.icon}>
               <Link href={item.path}>
-                <span>{item.title}</span>
+                <span className="text-base">{item.title}</span>
               </Link>
             </Menu.Item>
           )

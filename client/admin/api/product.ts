@@ -1,7 +1,7 @@
 import { ProductContent, ProductDetail } from "@/app/(private)/product/_components/product.type";
 import http from "@/configs/AxiosClient";
 
-export const getAllProduct = async (name: string,delFlag? :boolean) => {
+export const getAllProduct = async (name?: string,delFlag? :boolean) => {
     const response = await http.get("product", {
       params: {
         name: name,

@@ -97,7 +97,8 @@ export class OrderService {
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
-      .leftJoinAndSelect('orderItems.product', 'product');
+      .leftJoinAndSelect('orderItems.product', 'product')
+      .leftJoinAndSelect('product.imageUrl', 'imageUrl');
     // Thêm điều kiện delFlag
     if (delFlag !== undefined) {
       queryBuilder.andWhere('order.delFlag = :delFlag', { delFlag });
@@ -109,11 +110,15 @@ export class OrderService {
     }
 
     // Thêm điều kiện tìm kiếm theo khoảng ngày
-    if (fromDate) {
-      queryBuilder.andWhere('order.orderDate >= :fromDate', { fromDate });
-    }
-    if (toDate) {
-      queryBuilder.andWhere('order.orderDate <= :toDate', { toDate });
+    if (fromDate && toDate) {
+      queryBuilder.andWhere('order.createDate BETWEEN :fromDate AND :toDate', {
+        fromDate,
+        toDate,
+      });
+    } else if (fromDate) {
+      queryBuilder.andWhere('order.createDate >= :fromDate', { fromDate });
+    } else if (toDate) {
+      queryBuilder.andWhere('order.createDate <= :toDate', { toDate });
     }
 
     const orders = await queryBuilder.getMany();
@@ -121,10 +126,32 @@ export class OrderService {
   }
 
   async getOrderById(orderId: number) {
-    return await this.orderRepository.findOne({
-      where: { orderId },
-      relations: ['orderItems', 'orderItems.product'],
-    });
+    const queryBuilder = this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.orderItems', 'orderItem')
+      .leftJoinAndSelect('orderItem.product', 'product')
+      .select([
+        'order',
+        'user.userId',
+        'user.username',
+        'user.email',
+        'user.phone',
+        'user.address',
+        'user.role',
+        'user.fullname',
+        'user.sex',
+        'user.birthday',
+        'orderItem',
+        'product',
+      ])
+      .where('order.orderId = :orderId', { orderId });
+
+    const order = await queryBuilder.getOne();
+    if (!order) {
+      throw new NotFoundException(`Order with id ${orderId} not found`);
+    }
+    return order;
   }
 
   async updateOrder(
@@ -222,7 +249,7 @@ export class OrderService {
 
     const order = await this.orderRepository.findOne({
       where: { orderId },
-      relations: ['orderItems', 'orderItems.product']
+      relations: ['orderItems', 'orderItems.product'],
     });
 
     if (!order) {

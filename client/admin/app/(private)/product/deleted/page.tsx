@@ -181,13 +181,13 @@ export default function Product() {
           <img
             src={`${process.env.NEXT_PUBLIC_SERVER_URL}/${thumbnail.imageUrl}`}
             alt="Product Thumbnail"
-            style={{ width: 70, height: 70, objectFit: "cover" }}
+            style={{ width: 50, height: 50, objectFit: "cover" }}
           />
         ) : (
           <img
             src="https://t3.ftcdn.net/jpg/04/60/01/36/360_F_460013622_6xF8uN6ubMvLx0tAJECBHfKPoNOR5cRa.jpg"
             alt="Default Thumbnail"
-            style={{ width: 70, height: 70, objectFit: "cover" }}
+            style={{ width: 50, height: 50, objectFit: "cover" }}
           />
         );
       },

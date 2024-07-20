@@ -5,10 +5,10 @@ export interface ListUser {
     phone: string;
     address: string;
     role: string;
-    createDate?: string;
-    updateDate?: string;
-    createUser?: string;
-    updateUser?: string;
+    createDate: string;
+    updateDate: string;
+    createUser: string;
+    updateUser: string;
     delFlag?: boolean;
 }
 

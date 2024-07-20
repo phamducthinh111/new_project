@@ -104,7 +104,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ productDentail, refreshData }
               Are you sure you want to delete product{" "} <br/>
               <strong>{productDentail?.name || ""}</strong>?
             </>
-          }          okButtonProps={{ danger: true }}
+          }
+          okButtonProps={{ danger: true }}
           type="delete"
         />
     </div>

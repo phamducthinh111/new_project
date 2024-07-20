@@ -48,7 +48,6 @@ export default function User() {
   const [isDisabledCreate, setIsDisabledCreate] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<ListUser>();
   const [isLoading, setIsLoading] = useState(false);
-  const activeUsers = false;
   // const { mutate, isLoading } = useMutation(getAllUser, {
   //   onSuccess: (response) => {
   //     response.sort((a: any, b: any) => {
@@ -73,7 +72,7 @@ export default function User() {
       setIsLoading(true)
       const response = await getAllUser(searchValue, selectedRole);
       if (response) {
-        response.sort((a: any, b: any) => {
+        response.sort((a: ListUser, b: ListUser) => {
           if (a.role === Role.admin) return -1;
           if (b.role === Role.admin) return 1;
           const dateA = new Date(a.updateDate);
@@ -260,7 +259,7 @@ export default function User() {
       title: "",
       dataIndex: "index",
       key: "index",
-      render: (_: any, __: any, index: number) => index + 1, // Hiển thị số thứ tự
+      render: (_: string, __: ListUser, index: number) => index + 1, // Hiển thị số thứ tự
     },
     {
       title: "Username",
@@ -342,7 +341,7 @@ export default function User() {
             title: "Actions",
             dataIndex: "actions",
             key: "actions",
-            render: (_: any, record: ListUser) =>
+            render: (_: string, record: ListUser) =>
               record.role === Role.admin ||
               record.username === userProfile.username
                 ? null
@@ -392,7 +391,7 @@ export default function User() {
       {isLoading ? (
         <Loading />
       ) : (
-        <Table columns={columns} dataSource={userData} rowKey="id" />
+        <Table columns={columns} dataSource={userData} rowKey="userId" />
       )}
       <CustomModal
         title={isPopupCreate ? "Create User" : "Update User"}
