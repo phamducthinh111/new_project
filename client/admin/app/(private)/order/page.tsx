@@ -41,11 +41,14 @@ import ModalAlert from "@/components/AlertModal/AlertModal";
 import DeleteOrderForm from "./_components/popupDeleteOrder";
 import { errorOrderMessages } from "@/constants/error-messages.constants";
 import { Dayjs } from "dayjs";
+import { useRouter } from "next/navigation";
+import { formatVND } from "@/constants/formatVND.constants";
 
 const dateFormat = "DD/MM/YYYY";
 
 export default function Order() {
   const { userProfile } = useAppContetxt();
+  const router = useRouter();
   const [ordersData, setOrdersData] = useState<OrderDentail[]>([]);
   const [refreshData, setRefreshData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -182,6 +185,10 @@ export default function Order() {
     );
   };
 
+  const onBtnViewOrder = (record: OrderDentail) => {
+    router.push(`order/${record.orderId}`);
+  }
+
   const actionPopover = (record: OrderDentail) => (
     <Popover
       content={
@@ -189,7 +196,7 @@ export default function Order() {
           <Button
             key="view"
             title="Title"
-            // onClick={() => onBtnChangeStatus(record)}
+            onClick={() => onBtnViewOrder(record)}
             icon={<EyeOutlined />}
             type="link"
             className="w-full text-left"
@@ -246,7 +253,7 @@ export default function Order() {
             );
             return (
               <div key={orderItem.id} className="flex mb-2 items-center">
-                <span className="mr-2 text-base">x {orderItem.quantity}</span>
+                <span className="mr-2 text-base">x{orderItem.quantity}</span>
                 {thumbnail ? (
                   <img
                     src={`${process.env.NEXT_PUBLIC_SERVER_URL}/${thumbnail.imageUrl}`}
@@ -281,7 +288,7 @@ export default function Order() {
       title: "OrderCode",
       dataIndex: "orderId",
       key: "orderId",
-      className: "max-w-24 text-center",
+      className: "max-w-24",
     },
     {
       title: "Order Date",
@@ -289,17 +296,17 @@ export default function Order() {
       key: "createDate",
       render: (text: string) => new Date(text).toLocaleDateString(),
     },
-    {
-      title: "Customer",
-      dataIndex: "createUser",
-      key: "createUser",
-      render: (text: string) => <strong>{text}</strong>,
-    },
+    // {
+    //   title: "Customer",
+    //   dataIndex: "createUser",
+    //   key: "createUser",
+    //   render: (text: string) => <strong>{text}</strong>,
+    // },
     {
       title: "Price (VNĐ)",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (text: string) => <span className="text-base">{text},000</span>,
+      render: (text: number) => <span className="text-base">{formatVND(text)}</span>,
     },
     {
       title: "Status",

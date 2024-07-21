@@ -15,7 +15,7 @@ export interface OrderDentail {
   updateUser: string;
   delFlag: boolean;
   orderId: number;
-  status: string;
+  status: OrderStatus;
   totalPrice: number;
   desc: string | null;
   user: UserProfile,
@@ -52,6 +52,23 @@ export const StatusOptions = [
     label: "CANCELLED",
   },
 ];
+
+export const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'gold';
+    case 'processing':
+      return 'geekblue';
+    case 'shipped':
+      return 'purple';
+    case 'delivered':
+      return 'green';
+    case 'cancelled':
+      return 'red';
+    default:
+      return 'cyan';
+  }
+};
 
 export interface DeleteForm {
   desc: string
