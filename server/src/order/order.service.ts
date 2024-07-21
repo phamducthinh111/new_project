@@ -66,12 +66,20 @@ export class OrderService {
       orderItem.product = product;
       orderItem.quantity = itemData.quantity;
       orderItem.price = product.price * itemData.quantity;
-      newOrder.totalPrice += orderItem.price;
+
+      // Thay đổi giá sản phẩm trong đơn hàng
+      orderItems.push(orderItem);
+
+      // Cập nhật số lượng sản phẩm
       product.quantity -= itemData.quantity;
       await this.productService.updateQuantityProduct(product);
-      orderItems.push(orderItem);
     }
+    // Tính tổng giá trị đơn hàng sau khi đã thêm tất cả các sản phẩm
     newOrder.orderItems = orderItems;
+    newOrder.totalPrice = orderItems.reduce(
+      (total, item) => total + item.price,
+      0,
+    );
     const createdOrder = await this.orderRepository.save(newOrder);
     return createdOrder;
   }
@@ -96,9 +104,19 @@ export class OrderService {
 
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .leftJoinAndSelect('orderItems.product', 'product')
-      .leftJoinAndSelect('product.imageUrl', 'imageUrl');
+      .leftJoinAndSelect('product.imageUrl', 'imageUrl')
+      .select([
+        'order',
+        'orderItems',
+        'product.name',
+        'user.userId',
+        'user.username',
+        'user.fullname',
+        'imageUrl',
+      ]);
     // Thêm điều kiện delFlag
     if (delFlag !== undefined) {
       queryBuilder.andWhere('order.delFlag = :delFlag', { delFlag });
@@ -131,6 +149,7 @@ export class OrderService {
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.orderItems', 'orderItem')
       .leftJoinAndSelect('orderItem.product', 'product')
+      .leftJoinAndSelect('product.imageUrl', 'imageUrl')
       .select([
         'order',
         'user.userId',
@@ -144,6 +163,7 @@ export class OrderService {
         'user.birthday',
         'orderItem',
         'product',
+        'imageUrl',
       ])
       .where('order.orderId = :orderId', { orderId });
 

@@ -5,7 +5,7 @@ import { DeleteForm } from "./order.type";
 
 interface CreateUserFormProps {
   form: FormInstance<DeleteForm>;
-  onFieldsChange: any;
+  onFieldsChange: () => void;
 }
 
 const DeleteOrderForm = (props: CreateUserFormProps) => {

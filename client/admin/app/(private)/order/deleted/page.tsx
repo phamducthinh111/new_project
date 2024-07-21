@@ -7,6 +7,7 @@ import { useAppContetxt } from "@/app/AppProvider";
 import { OrderDentail, OrderStatus } from "../_components/order.type";
 import { DeleteOutlined, EllipsisOutlined, EyeOutlined, SyncOutlined } from "@ant-design/icons";
 import { getAllOrders } from "@/api/order";
+import { formatVND } from "@/constants/formatVND.constants";
 
 export default function Order() {
   const { userProfile } = useAppContetxt();
@@ -151,7 +152,7 @@ export default function Order() {
         title: "Price (VNĐ)",
         dataIndex: "totalPrice",
         key: "totalPrice",
-        render: (text: string) => <span className="text-base">{text},000</span>,
+        render: (text: number) => <span className="text-base">{formatVND(text)}</span>,
       },
     // {
     //   title: "Status",

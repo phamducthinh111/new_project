@@ -37,7 +37,7 @@ import { Role } from "../../user/_components/user.type";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-export default function Product({ params }: any) {
+export default function ProductDetailPage({ params }: any) {
   const { userProfile } = useAppContetxt();
   const [productDentail, setProductDentail] = useState<ProductDetail | null>(
     null
