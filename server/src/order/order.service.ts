@@ -328,4 +328,71 @@ export class OrderService {
     await this.orderRepository.remove(order);
     return order;
   }
+
+  async getSummary(currentUserId: number) {
+    const findUser = await this.userService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
+
+    const totalOrders = await this.orderRepository.count();
+    const totalOrdersDeleted = await this.orderRepository.count({
+      where: { delFlag: true },
+    });
+    const totalOrdersNotDeleted = await this.orderRepository.count({
+      where: { delFlag: false },
+    });
+    const totalRevenue = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('SUM(order.totalPrice)', 'total')
+      .getRawOne();
+
+    const totalProductsSold = await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .select('SUM(orderItem.quantity)', 'total')
+      .getRawOne();
+
+    return {
+      totalOrders,
+      totalOrdersDeleted,
+      totalOrdersNotDeleted,
+      totalRevenue: totalRevenue.total,
+      totalProductsSold: totalProductsSold.total,
+    };
+  }
+
+  async getRevenue(currentUserId: number) {
+    const findUser = await this.userService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
+
+    const revenueByDay = await this.orderRepository
+      .createQueryBuilder('order')
+      .select("TO_CHAR(order.createDate, 'YYYY-MM-DD')", 'date')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy("TO_CHAR(order.createDate, 'YYYY-MM-DD')")
+      .getRawMany();
+
+    const revenueByMonth = await this.orderRepository
+      .createQueryBuilder('order')
+      .select("TO_CHAR(order.createDate, 'YYYY-MM')", 'month')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy("TO_CHAR(order.createDate, 'YYYY-MM')")
+      .getRawMany();
+
+    const revenueByYear = await this.orderRepository
+      .createQueryBuilder('order')
+      .select("TO_CHAR(order.createDate, 'YYYY')", 'year')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy("TO_CHAR(order.createDate, 'YYYY')")
+      .getRawMany();
+
+    return {
+      revenueByDay,
+      revenueByMonth,
+      revenueByYear,
+    };
+  }
+
 }

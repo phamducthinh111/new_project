@@ -157,11 +157,46 @@ export class OrderController {
     @Param('orderId') orderId: number,
   ) {
     try {
-      const result = await this.orderService.deleteOrder(
-        currentUserId,
-        orderId,
+      const result = await this.orderService.getSummary(
+        currentUserId
       );
-      return res.send(ResponseObject.success('Order deleted successfully'));
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+      .status(HttpStatus.NOT_FOUND)
+      .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
+  @Get('dashboard/summary')
+  async getSummary(
+    @CurrentUser('userId') currentUserId,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.orderService.getSummary(
+        currentUserId,
+      );
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+      .status(HttpStatus.NOT_FOUND)
+      .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
+  @Get('dashboard/revenue')
+  async getRevenue(
+    @CurrentUser('userId') currentUserId,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.orderService.getRevenue(
+        currentUserId,
+      );
+      return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
       return res

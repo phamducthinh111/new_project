@@ -408,6 +408,7 @@ export default function ProductDetailPage({ params }: any) {
           okText={isCancelStatus ? "Save": "OK"}
           onCancel={handleCancelPopup}
           onOk={handleOk}
+          okButtonProps={isCancelStatus && {danger : true}}
           content={
             getNextStatus(orderDentail.status) &&
             (isCancelStatus ? (
@@ -417,7 +418,7 @@ export default function ProductDetailPage({ params }: any) {
               </>
             ) : (
               <>
-                Do you want change status{" "}
+                Do you want change status Ordercode{" "}
                 <strong>#{orderDentail.orderId}</strong>
                 {" "}to{" "}
                 <strong>
