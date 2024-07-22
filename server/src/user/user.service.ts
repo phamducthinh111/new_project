@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entity/user.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Role } from 'src/libs/decorators/role.enum';
 import {
@@ -57,7 +57,13 @@ export class UserService {
   }
 
   async findOneByUsername(username: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { username, delFlag: false } });
+    return this.userRepository.findOne({
+      where: {
+        username,
+        delFlag: false,
+        role: Not(Role.user), // Điều kiện để loại trừ người dùng với role 'USER'
+      },
+    });
   }
 
   async findOneById(userId: number): Promise<User | undefined> {
@@ -139,6 +145,28 @@ export class UserService {
     return findUser;
   }
 
+  async resetPassword(userId: number, currentUserId: number) {
+    const findUser = await this.userRepository.findOne({ where: { userId } });
+    const findCurrenUser = await this.userRepository.findOne({
+      where: { userId: currentUserId },
+    });
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    if (findCurrenUser.role !== Role.admin && findCurrenUser.role !== Role.manager) {
+      throw new NotFoundException(
+        `Account doesn't have permission to update Role`,
+      );
+    }
+    const passwordDefaut = '1111'
+    const hashedPassword = await bcrypt.hash(passwordDefaut, 10);
+    findUser.updateDate = new Date();
+    findUser.updateUser = findCurrenUser.username;
+    findUser.password = hashedPassword;
+    await this.userRepository.update(userId, findUser);
+    return findUser;
+  }
+
   async changePasswordById(
     passwordProfileDto: PasswordProfileDto,
     currentUserId: number,
@@ -161,6 +189,9 @@ export class UserService {
       10,
     );
     findUser.password = hashedPassword;
+    findUser.updateDate = new Date();
+    findUser.updateUser = findUser.username;
+
     await this.userRepository.update(currentUserId, findUser);
     return findUser;
   }
@@ -281,7 +312,7 @@ export class UserService {
     const findCurrenUser = await this.userRepository.findOne({
       where: { userId: currentUserId },
     });
-    if (findCurrenUser.role !== Role.admin) {
+    if (findCurrenUser.role !== Role.admin && findCurrenUser.role !== Role.manager) {
       throw new NotFoundException(
         `Account doesn't have permission to update Role`,
       );

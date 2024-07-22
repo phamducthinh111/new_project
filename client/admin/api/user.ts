@@ -39,3 +39,8 @@ export const deleteUser = async (usrId: any) => {
   return response;
 }
 
+export const resetPassword = async (usrId: any) => {
+  const response = await http.put(`users/resetPassword/${usrId}`);
+  return response;
+}
+

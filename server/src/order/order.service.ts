@@ -345,11 +345,14 @@ export class OrderService {
     const totalRevenue = await this.orderRepository
       .createQueryBuilder('order')
       .select('SUM(order.totalPrice)', 'total')
+      .where('order.delFlag = :delFlag', { delFlag: false })
       .getRawOne();
 
-    const totalProductsSold = await this.orderItemRepository
+      const totalProductsSold = await this.orderItemRepository
       .createQueryBuilder('orderItem')
+      .innerJoin('orderItem.order', 'order')
       .select('SUM(orderItem.quantity)', 'total')
+      .where('order.delFlag = :delFlag', { delFlag: false })
       .getRawOne();
 
     return {
@@ -371,6 +374,7 @@ export class OrderService {
       .createQueryBuilder('order')
       .select("TO_CHAR(order.createDate, 'YYYY-MM-DD')", 'date')
       .addSelect('COUNT(*)', 'count')
+      .where('order.delFlag = :delFlag', { delFlag: false })
       .groupBy("TO_CHAR(order.createDate, 'YYYY-MM-DD')")
       .getRawMany();
 
@@ -378,6 +382,7 @@ export class OrderService {
       .createQueryBuilder('order')
       .select("TO_CHAR(order.createDate, 'YYYY-MM')", 'month')
       .addSelect('COUNT(*)', 'count')
+      .where('order.delFlag = :delFlag', { delFlag: false })
       .groupBy("TO_CHAR(order.createDate, 'YYYY-MM')")
       .getRawMany();
 
@@ -385,6 +390,7 @@ export class OrderService {
       .createQueryBuilder('order')
       .select("TO_CHAR(order.createDate, 'YYYY')", 'year')
       .addSelect('COUNT(*)', 'count')
+      .where('order.delFlag = :delFlag', { delFlag: false })
       .groupBy("TO_CHAR(order.createDate, 'YYYY')")
       .getRawMany();
 
@@ -395,4 +401,20 @@ export class OrderService {
     };
   }
 
+  async getOrderStatusSummary(currentUserId: number) {
+    const findUser = await this.userService.findOneById(currentUserId);
+    if (!findUser) {
+      throw new NotFoundException(`User with id ${currentUserId} not found`);
+    }
+
+    const orderStatusSummary = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('order.status', 'status')
+      .addSelect('COUNT(*)', 'count')
+      .where('order.delFlag = :delFlag', { delFlag: false })
+      .groupBy('order.status')
+      .getRawMany();
+
+    return orderStatusSummary;
+  }
 }

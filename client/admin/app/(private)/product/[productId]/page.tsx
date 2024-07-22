@@ -12,6 +12,7 @@ import {
   ImageUrl,
   ProductContent,
   ProductDetail,
+  typeOptions,
 } from "../_components/product.type";
 import {
   Col,
@@ -22,6 +23,7 @@ import {
   Form,
   Upload,
   message,
+  Select,
 } from "antd";
 import {
   CloseOutlined,
@@ -320,7 +322,11 @@ export default function ProductDetailPage({ params }: any) {
                     { required: true, message: "Please input the type!" },
                   ]}
                 >
-                  <Input />
+                  <Select
+                    placeholder="Select Type"
+                    allowClear
+                    options={typeOptions}
+                  />
                 </Form.Item>
                 <Form.Item label="Location" name="location">
                   <Input />
@@ -334,7 +340,8 @@ export default function ProductDetailPage({ params }: any) {
                 <Form.Item label="Description" name="description">
                   <TextArea rows={4} />
                 </Form.Item>
-                {userProfile && userProfile?.role === Role.admin || userProfile?.role === Role.manager ? (
+                {(userProfile && userProfile?.role === Role.admin) ||
+                userProfile?.role === Role.manager ? (
                   <div className="mt-5 text-gray-500 italic text-right w-full">
                     <Text>CreateUser: {productDentail.createUser}</Text>
                     <br />
@@ -343,18 +350,14 @@ export default function ProductDetailPage({ params }: any) {
                     <Text>
                       CreateDate:{" "}
                       {productDentail.createDate
-                        ? new Date(
-                            productDentail.createDate
-                          ).toLocaleString()
+                        ? new Date(productDentail.createDate).toLocaleString()
                         : "N/A"}
                     </Text>
                     <br />
                     <Text>
                       UpdateDate:{" "}
                       {productDentail.updateDate
-                        ? new Date(
-                            productDentail.updateDate
-                          ).toLocaleString()
+                        ? new Date(productDentail.updateDate).toLocaleString()
                         : "N/A"}
                     </Text>
                   </div>
