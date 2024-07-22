@@ -79,6 +79,7 @@ export default function ProductDetailPage({ params }: any) {
         const response = await getOrderDentail(orderId);
         if (response) {
           setOrderDentail(response);
+          setRefreshData(false);
         }
       }
     };

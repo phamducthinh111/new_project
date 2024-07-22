@@ -1,26 +1,43 @@
 "use client";
 
-import { Button, Col, Popover, Row, Select, Table, Tag } from "antd";
+import { Button, Col, DatePicker, Input, message, Popover, Row, Select, Table, Tag } from "antd";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useAppContetxt } from "@/app/AppProvider";
-import { OrderDentail, OrderStatus } from "../_components/order.type";
-import { DeleteOutlined, EllipsisOutlined, EyeOutlined, SyncOutlined } from "@ant-design/icons";
-import { getAllOrders } from "@/api/order";
+import { OrderDentail, OrderStatus, StatusOptions } from "../_components/order.type";
+import { ArrowRightOutlined, DeleteOutlined, EllipsisOutlined, EyeOutlined, RollbackOutlined, SyncOutlined } from "@ant-design/icons";
+import { deleteOrder, getAllOrders, rollbackOrder } from "@/api/order";
 import { formatVND } from "@/constants/formatVND.constants";
+import { Dayjs } from "dayjs";
+import ModalAlert from "@/components/AlertModal/AlertModal";
 
 export default function Order() {
   const { userProfile } = useAppContetxt();
   const [ordersData, setOrdersData] = useState<OrderDentail[]>([]);
   const [refreshData, setRefreshData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formDate, setFromDate] = useState<Dayjs>();
+  const [toDate, setToDate] = useState<Dayjs>();
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus>();
+  const [isPopupRollback, setIsPopupRollback] = useState<boolean>(false);
+  const [isOpenPopupDelete, setIsOpenPopupDelete] = useState<boolean>(false);
+  const [orderDentail, setOrderDentail] = useState<OrderDentail>();
+
+
+
   const activeProduct = true;
+  const dateFormat = "DD/MM/YYYY";
 
   useEffect(() => {
     // mutate(searchValue, selectedRole);
     const fetchData = async () => {
       setIsLoading(true);
-      const response = await getAllOrders(undefined, activeProduct);
+      const response = await getAllOrders(
+        selectedStatus,
+        activeProduct,
+        formDate,
+        toDate
+      );
       if (response) {
         response.sort((a: OrderDentail, b: OrderDentail) => {
           const dateA = new Date(a.updateDate);
@@ -33,43 +50,98 @@ export default function Order() {
       setIsLoading(false);
     };
     fetchData();
-  }, [refreshData]);
+  }, [refreshData, selectedStatus, formDate, toDate]);
 
+  const handleStatusSelect = async (value: OrderStatus) => {
+    setSelectedStatus(value);
+  };
+
+  const handleFromDateRangeChange = (date: Dayjs) => {
+    setFromDate(date);
+  };
+
+  const handleToDateRangeChange = (date: Dayjs) => {
+    setToDate(date);
+  };
+
+  const onBtnRollback = (record: OrderDentail) => {
+    setIsOpenPopupDelete(true);
+    setIsPopupRollback(true)
+    setOrderDentail(record);
+  }
+
+  const onBtnDeleted = (record: OrderDentail) => {
+    setIsOpenPopupDelete(true);
+    setIsPopupRollback(false)
+    setOrderDentail(record);
+  }
+
+  const handleRollback = async () => {
+    try {
+      const response = await rollbackOrder(orderDentail?.orderId);
+      if (response) {
+        message.success(`Rollback order successfully`);
+        setIsOpenPopupDelete(false);
+        setRefreshData(true);
+      }
+    }catch(error) {
+      console.error(error);
+    }
+  }
+
+  const handleDeleted = async () => {
+    try {
+      const response = await deleteOrder(orderDentail?.orderId);
+      if (response) {
+        message.success(`Rollback order successfully`);
+        setIsOpenPopupDelete(false);
+        setRefreshData(true);
+      }
+    }catch(error) {
+      console.error(error);
+    }
+  }
+
+  const handleOk = () => {
+    if(isPopupRollback) {
+      handleRollback()
+    } else {
+      handleDeleted()
+    }
+  };
+
+  const handleCancel = () => {
+    setIsOpenPopupDelete(false);
+    setIsPopupRollback(false)
+  };
+  
   const actionPopover = (record: OrderDentail) => (
     <Popover
-      content={
-        <>
-          <Button
-            key="view"
-            // onClick={() => onBtnEdit(record)}
-            icon={<EyeOutlined />}
-            type="link"
-          >
-            Detail
-          </Button>
-          <Button
-            key="view"
-            // onClick={() => onBtnEdit(record)}
-            icon={<SyncOutlined />}
-            type="link"
-          >
-            Change Status
-          </Button>
-          <Button
-            key="delete"
-            // onClick={() => onBtnDelete(record)}
-            icon={<DeleteOutlined />}
-            type="link"
-            danger
-          >
-            Delete
-          </Button>
-        </>
-      }
-      trigger="click"
-    >
-      <Button type="text" icon={<EllipsisOutlined />} />
-    </Popover>
+    content={
+      <>
+        <Button
+          key="rollback"
+          onClick={() => onBtnRollback(record)}
+          icon={<RollbackOutlined />}
+          type="link"
+        >
+          Rollback
+        </Button>
+        <Button
+          key="delete"
+          onClick={() => onBtnDeleted(record)}
+          icon={<DeleteOutlined />}
+          type="link"
+          danger
+        >
+          Delete
+        </Button>
+      </>
+    }
+    trigger="click"
+  >
+    <Button type="text" icon={<EllipsisOutlined />} />
+  </Popover>
   );
 
   const columns = [
@@ -215,28 +287,65 @@ export default function Order() {
 
   return (
     <div className="mt-5">
-      <Row justify="center" className="mb-5" gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={4} lg={4} xl={4}>
+   <Row className="mb-5 flex justify-between">
+        <Col flex="1" className="flex items-center">
+          <Input placeholder="Order Code" className="w-full max-w-xs" />
+        </Col>
+        <Col flex="1" className="flex items-center justify-center">
+          <DatePicker
+            format={dateFormat}
+            placeholder="From date"
+            style={{ width: "40%" }}
+            onChange={handleFromDateRangeChange}
+          />
+          <span className="mx-3">
+            <ArrowRightOutlined className="w-3" />
+          </span>
+          <DatePicker
+            format={dateFormat}
+            placeholder="To date"
+            style={{ width: "40%" }}
+            onChange={handleToDateRangeChange}
+          />
+        </Col>
+        <Col flex="1" className="flex items-center justify-end">
           <Select
             placeholder="Select status"
             allowClear
-            style={{ width: "100%" }}
-            // onChange={handleRoleChange}
-            // value={selectedRole}
-            // options={roleOptions}
+            className="w-full max-w-xs"
+            onChange={handleStatusSelect}
+            options={StatusOptions}
           />
         </Col>
       </Row>
-      {/* {isLoading ? (
-        <Loading />
-      ) : ( */}
       <Table
         columns={columns}
         dataSource={ordersData}
         rowKey="orderId"
         loading={isLoading}
       />
-      {/* )} */}
+      <ModalAlert
+        visible={isOpenPopupDelete}
+        title={isPopupRollback ? "Rollback User" : "Deleted User"}
+        onCancel={handleCancel}
+        onOk={handleOk}
+        okText={isPopupRollback ? "OK" : "Deleted"}
+        type={isPopupRollback ? "info" : "delete"}
+        okButtonProps={{danger: !isPopupRollback}}
+        content={
+          isPopupRollback ? (
+            <>
+              Are you sure you want to restore Order{" "}
+              <strong>#{orderDentail?.orderId || ""}</strong>?
+            </>
+          ) : (
+            <>
+              This action is irreversible. Are you sure you want to delete{" "}
+              <strong>#{orderDentail?.orderId || ""}</strong>?
+            </>
+          )
+        }
+      />
     </div>
   );
 }

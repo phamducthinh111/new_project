@@ -91,7 +91,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ productDentail, refreshData }
       >
         <Meta
           title={productDentail.name}
-          description={productDentail.typeName}
+          description={`Quantity: ${productDentail?.quantity}`}
         />
       </Card>
       <ModalAlert

@@ -132,6 +132,7 @@ export class ProductService {
         'product.name',
         'product.typeName',
         'product.delFlag',
+        'product.quantity',
         'product.createDate',
         'product.createUser',
         'product.updateDate',

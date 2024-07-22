@@ -150,7 +150,7 @@ export class OrderController {
     }
   }
 
-  @Delete(':orderId')
+  @Delete('delete/:orderId')
   async deleteOrder(
     @CurrentUser('userId') currentUserId,
     @Res() res: Response,
@@ -194,6 +194,24 @@ export class OrderController {
   ) {
     try {
       const result = await this.orderService.getRevenue(
+        currentUserId,
+      );
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+      .status(HttpStatus.NOT_FOUND)
+      .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
+  @Get('dashboard/status-summary')
+  async getStatusOrderSummary(
+    @CurrentUser('userId') currentUserId,
+    @Res() res: Response,
+  ) {
+    try {
+      const result = await this.orderService.getOrderStatusSummary(
         currentUserId,
       );
       return res.send(ResponseObject.success(result));

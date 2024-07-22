@@ -89,6 +89,7 @@ const CreateUserForm = (
         <Input
           prefix={<MailOutlined className="site-form-item-icon" />}
           placeholder="Email"
+          disabled={!isPopupCreate}
         />
       </Form.Item>
       {isPopupCreate && (
@@ -122,6 +123,7 @@ const CreateUserForm = (
         <Input
           prefix={<PhoneOutlined className="site-form-item-icon" />}
           placeholder="Phone number"
+          disabled={!isPopupCreate}
         />
       </Form.Item>
       <Form.Item
@@ -131,6 +133,7 @@ const CreateUserForm = (
       >
         <Input
           prefix={<HomeOutlined className="site-form-item-icon" />}
+          disabled={!isPopupCreate}
           placeholder="Address"
         />
       </Form.Item>
@@ -144,7 +147,7 @@ const CreateUserForm = (
           allowClear
           value={Role.employess}
           options={updatedRoleOptions}
-          disabled={!isPopupCreate && userProfile?.role !== Role.admin}
+          // disabled={!isPopupCreate && userProfile?.role !== Role.admin}
         />
       </Form.Item>
     </Form>

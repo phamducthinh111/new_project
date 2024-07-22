@@ -144,6 +144,30 @@ export class UserControler {
     }
   }
 
+  @Put('resetPassword/:userId')
+  async resetPassword (
+    @Res() res: Response,
+    @Param('userId') userId: number,
+    @CurrentUser('userId') currentUserId,
+  ) {
+    try {
+      const result = await this.userService.resetPassword(
+        userId, currentUserId
+      );
+      if (!result) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send(ResponseObject.fail('User not found'));
+      }
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
   @Put('update/password')
   async changePasswordProfile (
     @Res() res: Response,

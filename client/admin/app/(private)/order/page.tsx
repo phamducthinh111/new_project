@@ -187,19 +187,18 @@ export default function Order() {
 
   const onBtnViewOrder = (record: OrderDentail) => {
     router.push(`order/${record.orderId}`);
-  }
+  };
 
   const actionPopover = (record: OrderDentail) => (
     <Popover
       content={
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col items-start space-y-2">
           <Button
             key="view"
             title="Title"
             onClick={() => onBtnViewOrder(record)}
             icon={<EyeOutlined />}
             type="link"
-            className="w-full text-left"
           >
             Detail
           </Button>
@@ -208,7 +207,6 @@ export default function Order() {
             onClick={() => onBtnChangeStatus(record)}
             icon={<SyncOutlined />}
             type="link"
-            className="w-full text-left"
           >
             Change Status
           </Button>
@@ -219,7 +217,6 @@ export default function Order() {
               icon={<DeleteOutlined />}
               type="link"
               danger
-              className="w-full text-left"
             >
               Delete
             </Button>
@@ -306,7 +303,9 @@ export default function Order() {
       title: "Price (VNĐ)",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (text: number) => <span className="text-base">{formatVND(text)}</span>,
+      render: (text: number) => (
+        <span className="text-base">{formatVND(text)}</span>
+      ),
     },
     {
       title: "Status",

@@ -1,6 +1,6 @@
 "use client";
 
-import { createEmp, getAllUser, removeUser, updateRoleEmp } from "@/api/user";
+import { createEmp, getAllUser, removeUser, resetPassword, updateRoleEmp } from "@/api/user";
 import { useAppContetxt } from "@/app/AppProvider";
 import {
   AutoComplete,
@@ -20,6 +20,9 @@ import {
   EditOutlined,
   DeleteOutlined,
   EllipsisOutlined,
+  UnlockOutlined,
+  RedoOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import { ChangeEvent, useEffect, useState } from "react";
 import CustomModal from "@/components/Modal/Modal";
@@ -47,7 +50,10 @@ export default function User() {
   const [isOpenDelPopup, setIsOpenDelPopup] = useState<boolean>(false);
   const [isDisabledCreate, setIsDisabledCreate] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<ListUser>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isOpenPopupResetPassword, setIsOpenPopupResetPassword] =
+    useState<boolean>(false);
+
   // const { mutate, isLoading } = useMutation(getAllUser, {
   //   onSuccess: (response) => {
   //     response.sort((a: any, b: any) => {
@@ -69,7 +75,7 @@ export default function User() {
   useEffect(() => {
     // mutate(searchValue, selectedRole);
     const fetchData = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       const response = await getAllUser(searchValue, selectedRole);
       if (response) {
         response.sort((a: ListUser, b: ListUser) => {
@@ -117,6 +123,7 @@ export default function User() {
     setIsOpenPopup(true);
     setisPopupCreate(true);
     setIsOpenDelPopup(false);
+    setIsOpenPopupResetPassword(false);
   };
   const onCreateNew = async () => {
     try {
@@ -154,13 +161,15 @@ export default function User() {
     setIsOpenPopup(true);
     setisPopupCreate(false);
     setIsOpenDelPopup(false);
+    setIsOpenPopupResetPassword(false);
     setCurrentUser(record);
   };
 
   const onBtnDelete = async (record: ListUser) => {
     setIsOpenDelPopup(true);
     setCurrentUser(record);
-    setIsOpenPopup(false)
+    setIsOpenPopup(false);
+    setIsOpenPopupResetPassword(false);
   };
 
   const handleEdit = async () => {
@@ -186,7 +195,7 @@ export default function User() {
         setIsOpenDelPopup(false);
         setRefreshData(true);
       }
-    }catch(error) {
+    } catch (error) {
       console.error(error);
     }
   };
@@ -208,6 +217,7 @@ export default function User() {
     setIsOpenPopup(false);
     setIsOpenDelPopup(false);
     setisPopupCreate(false);
+    setIsOpenPopupResetPassword(false);
   };
 
   const onFieldsChange = () => {
@@ -225,10 +235,31 @@ export default function User() {
     setIsDisabledCreate(isAnyFieldEmpty || hasFieldErrors);
   };
 
+  const onBtnResetPassword = (record: ListUser) => {
+    setIsOpenDelPopup(false);
+    setCurrentUser(record);
+    setIsOpenPopup(false);
+    setIsOpenPopupResetPassword(true);
+  };
+
+  const handleResetPassword = async () => {
+    try {
+      const response = await resetPassword(currentUser?.userId);
+      if (response) {
+        message.success(`Reset password successfully`);
+        setIsOpenPopupResetPassword(false);
+        setRefreshData(true);
+      }
+    } catch (error) {
+      console.error(error);
+      message.error(`Reset password error`);
+    }
+  }
+
   const actionPopover = (record: ListUser) => (
     <Popover
       content={
-        <>
+        <div className="flex flex-col items-start space-y-2">
           <Button
             key="edit"
             onClick={() => onBtnEdit(record)}
@@ -236,6 +267,14 @@ export default function User() {
             type="link"
           >
             Edit
+          </Button>
+          <Button
+            key="edit"
+            onClick={() => onBtnResetPassword(record)}
+            icon={<SyncOutlined />}
+            type="link"
+          >
+            Reset Password
           </Button>
           <Button
             key="delete"
@@ -246,7 +285,7 @@ export default function User() {
           >
             Delete
           </Button>
-        </>
+        </div>
       }
       trigger="click"
     >
@@ -360,7 +399,7 @@ export default function User() {
             value={searchValue}
             onChange={handleSearchChange}
           /> */}
-            <AutoComplete
+          <AutoComplete
             // style={{ width: 300, marginBottom: 20 }}
             onSearch={handleSearchChange}
             options={suggestions.map((item) => ({ value: item.username }))}
@@ -422,6 +461,19 @@ export default function User() {
         }
         okButtonProps={{ danger: true }}
         type="delete"
+      ></ModalAlert>
+      <ModalAlert
+        title="Reset Password"
+        visible={isOpenPopupResetPassword}
+        onOk={handleResetPassword}
+        onCancel={handleCancel}
+        okText="Reset"
+        content={
+          <>
+            Are you sure you want to reset password user{" "}
+            <strong>{currentUser?.username || ""}</strong>?
+          </>
+        }
       ></ModalAlert>
     </div>
   );

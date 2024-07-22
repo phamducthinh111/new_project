@@ -29,3 +29,28 @@ export const removeOrder = async (orderId: number, req: DeleteForm) => {
   const response = await http.put(`order/remove/${orderId}`, {body: req});
   return response.data
 }
+
+export const getOrderSummary = async () => {
+  const response = await http.get(`order/dashboard/summary`);
+  return response.data;
+}
+
+export const getOrderRevenue = async () => {
+  const response = await http.get(`order/dashboard/revenue`);
+  return response.data;
+}
+
+export const getStatusOrderSummary = async () => {
+  const response = await http.get(`order/dashboard/status-summary`);
+  return response.data;
+}
+
+export const rollbackOrder = async (orderId?: number) => {
+  const response = await http.put(`order/rollback/${orderId}`);
+  return response;
+}
+
+export const deleteOrder = async (orderId?: number) => {
+  const response = await http.delete(`order/delete/${orderId}`);
+  return response;
+}

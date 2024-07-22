@@ -28,7 +28,7 @@ export default function UsersDeleted() {
   const [userData, setUserData] = useState<ListUser[]>([]);
   const [refreshData, setRefreshData] = useState(false);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isOpenPopup, setIsOpenPopup] = useState<boolean>(false);
+  const [isOpenPopupDelete, setIsOpenPopupDelete] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<ListUser>();
   const [isPopupRollback, setIsPopupRollback] = useState<boolean>(false);
   const [suggestions, setSuggestions] = useState<ListUser[]>([]);
@@ -103,13 +103,13 @@ export default function UsersDeleted() {
       (!selectedRole || user.role === selectedRole)
   );
   const onBtnRollback = (record: ListUser) => {
-    setIsOpenPopup(true);
+    setIsOpenPopupDelete(true);
     setIsPopupRollback(true)
     setCurrentUser(record);
   }
 
   const onBtnDeleted = (record: ListUser) => {
-    setIsOpenPopup(true);
+    setIsOpenPopupDelete(true);
     setIsPopupRollback(false)
     setCurrentUser(record);
   }
@@ -119,7 +119,7 @@ export default function UsersDeleted() {
       const response = await rollbackUser(currentUser?.userId);
       if (response) {
         message.success(`Rollback user successfully`);
-        setIsOpenPopup(false);
+        setIsOpenPopupDelete(false);
         setRefreshData(true);
       }
     }catch(error) {
@@ -132,7 +132,7 @@ export default function UsersDeleted() {
       const response = await deleteUser(currentUser?.userId);
       if (response) {
         message.success(`Rollback user successfully`);
-        setIsOpenPopup(false);
+        setIsOpenPopupDelete(false);
         setRefreshData(true);
       }
     }catch(error) {
@@ -149,7 +149,8 @@ export default function UsersDeleted() {
   };
 
   const handleCancel = () => {
-    setIsOpenPopup(false);
+    setIsOpenPopupDelete(false);
+    setIsPopupRollback(false)
   };
 
   const actionPopover = (record: ListUser) => (
@@ -279,7 +280,7 @@ export default function UsersDeleted() {
         <Table columns={columns} dataSource={filteredData} rowKey="id" />
       )}
       <ModalAlert
-        visible={isOpenPopup}
+        visible={isOpenPopupDelete}
         title={isPopupRollback ? "Rollback User" : "Deleted User"}
         onCancel={handleCancel}
         onOk={handleOk}

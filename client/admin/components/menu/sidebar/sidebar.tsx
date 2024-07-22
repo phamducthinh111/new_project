@@ -9,8 +9,9 @@ import {
   HomeOutlined,
   OrderedListOutlined,
   ShopOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Layout, Menu, message } from "antd";
+import { Avatar, Button, Layout, Menu, message, Spin } from "antd";
 import { useEffect, useState } from "react";
 // import "./sidebar.css";
 import Link from "next/link";
@@ -18,11 +19,13 @@ import { logout, me } from "@/api/auth";
 import { useRouter } from "next/navigation";
 import { useAppContetxt } from "@/app/AppProvider";
 import { Role } from "@/app/(private)/user/_components/user.type";
+import Loading from "@/components/loading/loading";
 
 const { Sider } = Layout;
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { userProfile } = useAppContetxt();
   const toggleCollapsed = () => {
@@ -31,10 +34,13 @@ const SideBar = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      message.success('Logged out successfully');
-      router.push('/log-in');
-      router.refresh();
+      setIsLoading(true)
+      const response = await logout();
+      if(response) {
+        message.success('Logged out successfully');
+        router.push('/log-in');
+        router.refresh();
+      }
     } catch (error: any) {
       message.error(error.message || 'An error occurred during logout');
     }
@@ -115,6 +121,13 @@ const SideBar = () => {
     },
   ];
   
+  if(isLoading) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-black">
+        <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+      </div>
+    );
+  }
 
   return (
     <Sider
@@ -187,7 +200,7 @@ const SideBar = () => {
         </div> */}
           
       </Menu>
-      <div className="flex justify-center mt-auto mb-4">
+      <div className="flex justify-center mt-5 ">
         <Button type="primary" danger icon={<LogoutOutlined />} onClick={handleLogout}>
           {!collapsed && 'Log Out'}
         </Button>
