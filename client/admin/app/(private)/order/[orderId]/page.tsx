@@ -20,7 +20,6 @@ import {
 } from "antd";
 import Loading from "@/components/loading/loading";
 import dayjs from "dayjs";
-import { render } from "react-dom";
 import {
   ImageUrl,
   ProductDetail,
