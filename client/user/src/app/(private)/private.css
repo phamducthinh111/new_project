@@ -1,0 +1,26 @@
+.private-layout {
+    position: relative;
+    background-image: url('../../../public/image/login.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh; /* Đảm bảo chiều cao tối thiểu của phần tử bao quanh */
+    overflow: hidden;
+  }
+
+.private-layout::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Màu đen với độ mờ 50% */
+  z-index: 1;
+}
+
+/* Đảm bảo nội dung bên trong phần tử .private-layout không bị ảnh hưởng bởi lớp phủ */
+.private-layout > * {
+  position: relative;
+  z-index: 2;
+}
+  
