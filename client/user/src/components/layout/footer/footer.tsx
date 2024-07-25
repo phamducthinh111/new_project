@@ -73,7 +73,7 @@ export default function PageFooter() {
 
           {/* Đăng ký nhận tin tức */}
           <Col xs={24} sm={12} lg={6}>
-            <div className="w-full">
+            <div className="w-3/5">
               <Image src={ImageFooter} alt="Imagefooter" layout="responsive" />
             </div>
           </Col>

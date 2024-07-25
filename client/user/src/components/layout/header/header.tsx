@@ -40,7 +40,7 @@ export default function PageHeader() {
   const onClose = () => setVisible(false);
 
   return (
-    <div className="bg-stone-700 bg-opacity-50 mb-10 px-8 text-slate-50 backdrop-blur-lg">
+    <div className="bg-stone-700 bg-opacity-50 px-8 text-slate-50 backdrop-blur-lg">
       <Row className="items-center">
         <Col
           xs={4}
