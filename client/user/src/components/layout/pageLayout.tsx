@@ -1,4 +1,3 @@
-// "use client";
 import { PropsWithChildren } from "react";
 import PageFooter from "./footer/footer";
 import PageHeader from "./header/header";

@@ -41,31 +41,31 @@ axiosClient.interceptors.request.use(
 );
 
 // Interceptor để kiểm tra phản hồi từ máy chủ
-axiosClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    const { response, config } = error;
+// axiosClient.interceptors.response.use(
+//   (response) => {
+//     return response;
+//   },
+//   async (error) => {
+//     const { response, config } = error;
 
-    // Kiểm tra xem có phản hồi từ server không và mã lỗi là 401
-    if (response && response.status === 401) {
-      const loginUrl = 'auth/login'; // URL của API đăng nhập
+//     // Kiểm tra xem có phản hồi từ server không và mã lỗi là 401
+//     if (response && response.status === 401) {
+//       const loginUrl = 'auth/login'; // URL của API đăng nhập
 
-      // Nếu yêu cầu không phải là yêu cầu đăng nhập
-      if (config.url !== loginUrl) {
-        try {
-          await fetch('/api/auth/logout', { method: 'POST' });
-          sessionToken.value = '';
-          window.location.href = '/log-in'; // Điều hướng tới trang đăng nhập
-        } catch (err) {
-          console.error('Error during logout:', err);
-        }
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+//       // Nếu yêu cầu không phải là yêu cầu đăng nhập
+//       if (config.url !== loginUrl) {
+//         try {
+//           await fetch('/api/auth/logout', { method: 'POST' });
+//           sessionToken.value = '';
+//           window.location.href = '/log-in'; // Điều hướng tới trang đăng nhập
+//         } catch (err) {
+//           console.error('Error during logout:', err);
+//         }
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 // Xử lý lỗi từ phản hồi AxiosError
 const handleAxiosError = (error: AxiosError) => {

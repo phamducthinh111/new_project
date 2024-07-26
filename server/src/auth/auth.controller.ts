@@ -25,7 +25,19 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
   ): Promise<ResponseObject<AuthResponse>> {
-    const loginResponse = await this.authService.login(loginDto);
+    const loginResponse = await this.authService.loginEmployee(loginDto);
+    const {  token } = loginResponse;
+    return ResponseObject.success({
+      token
+    });
+  }
+
+  @Public()
+  @Post('login-user')
+  async loginUser(
+    @Body() loginDto: LoginDto,
+  ): Promise<ResponseObject<AuthResponse>> {
+    const loginResponse = await this.authService.loginUser(loginDto);
     const {  token } = loginResponse;
     return ResponseObject.success({
       token
@@ -34,11 +46,9 @@ export class AuthController {
 
   @Get('profile')
   async getUser(
-    // @Headers('authorization') authorization: string,
     @Res() res: Response,
     @CurrentUser('userId') currentUserId,
   ) {
-    // const token = authorization.split(' ')[1];
     const user = await this.authService.getAuthUserInfo(currentUserId);
     return res.send(ResponseObject.success(user)) ;
   }

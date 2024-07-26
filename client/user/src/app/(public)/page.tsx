@@ -11,6 +11,10 @@ import Image4 from "../../../public/image/home/image4.jpg";
 const { Meta } = Card;
 export default function Home() {
   const router = useRouter();
+
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
+
   return (
     <div>
       <div className="text-center  bg-stone-700 bg-opacity-50 lg:p-20 p-10 pb-10">
@@ -41,7 +45,7 @@ export default function Home() {
         >
           <Card
             className="w-full m-5 bg-stone-700 border-stone-700"
-            cover={<Image src={Image1} alt="image1" layout="responsive" />}
+            cover={<Image src={Image1} alt="image1" />}
           >
             <Meta
               title={
@@ -74,7 +78,7 @@ export default function Home() {
         >
           <Card
             className="w-full m-5 bg-[#B89D64] border-[#B89D64]"
-            cover={<Image src={Image2} alt="image2" layout="responsive" />}
+            cover={<Image src={Image2} alt="image2"  />}
           >
             <Meta
               title={
@@ -102,7 +106,7 @@ export default function Home() {
         >
           <Card
             className="w-full m-5 bg-[#513826] border-[#513826]"
-            cover={<Image src={Image3} alt="image3" layout="responsive" />}
+            cover={<Image src={Image3} alt="image3"  />}
           >
             <Meta
               title={
@@ -132,7 +136,7 @@ export default function Home() {
         >
           <Card
             className="w-full m-5 bg-[#846149] border-[#846149]"
-            cover={<Image src={Image4} alt="image4" layout="responsive" />}
+            cover={<Image src={Image4} alt="image4"  />}
           >
             <Meta
               title={

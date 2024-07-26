@@ -9,12 +9,51 @@ import {
   PhoneOutlined,
   EnvironmentOutlined,
 } from "@ant-design/icons";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { errorMessages } from "@/constants/error-messages.constants";
+import { regexConstant } from "@/constants/regex.constant";
+import { register, RegisterForm } from "@/api/auth";
+import { useRouter } from "next/navigation";
+import { useMutation } from "react-query";
+import Notification from "@/components/notification/NotificationComponent";
 
 export default function Register() {
-  const onFinish = (values: any) => {
-    console.log("Received values of form: ", values);
+  const router = useRouter();
+  const [form] = Form.useForm();
+  const [isloadingConfỉm, setIsLoadingConfirm] = useState(false);
+  const {mutate} = useMutation(register, {
+    onSuccess: async (newData) => {
+      router.push('log-in')
+      Notification({ type: 'success', message: 'Success', description: 'Account create successfully' });
+    },
+    onError: (err:any) => {
+      setIsLoadingConfirm(false);
+      // Notification({ type: 'error', message: 'Error', description: 'Account creation failed' });
+      console.log('err',err)
+      if (err && err.message.includes("Username")) {
+        form.setFields([
+          {
+            name: "username",
+            errors: [(err.message)],
+          },
+        ]);
+      } else if (err.message.includes("Email")) {
+        form.setFields([
+          {
+            name: "email",
+            errors: [(err.message)],
+          },
+        ]);
+      }
+    },
+  })
+
+  const onFinish = (values: RegisterForm) => {
+    setIsLoadingConfirm(true);
+    const {confirmPassword, ...valueRegister} = values
+    console.log(valueRegister)
+    mutate(valueRegister);
   };
 
   return (
@@ -26,10 +65,14 @@ export default function Register() {
           className="register-form"
           initialValues={{ remember: true }}
           onFinish={onFinish}
+          form={form}
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: "Please input your Username!" }]}
+            rules={[
+              { required: true, message: errorMessages.username.required },
+              { max: 50, message: errorMessages.username.maxlength },
+            ]}
           >
             <Input
               prefix={<UserOutlined className="site-form-item-icon" />}
@@ -38,7 +81,13 @@ export default function Register() {
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Please input your Password!" }]}
+            rules={[
+              { required: true, message: errorMessages.password.required },
+              {
+                pattern: regexConstant.password,
+                message: errorMessages.password.pattern,
+              },
+            ]}
           >
             <Input
               prefix={<LockOutlined className="site-form-item-icon" />}
@@ -50,15 +99,13 @@ export default function Register() {
             name="confirmPassword"
             dependencies={["password"]}
             rules={[
-              { required: true, message: "Please confirm your password!" },
+              { required: true, message: errorMessages.confirmPassword.required},
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
+                  if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(
-                    "The two passwords that you entered do not match!"
-                  );
+                  return Promise.reject(errorMessages.confirmPassword.notMatch);
                 },
               }),
             ]}
@@ -73,7 +120,13 @@ export default function Register() {
           </Form.Item>
           <Form.Item
             name="email"
-            rules={[{ required: true, message: "Please input your Email!" }]}
+            rules={[
+              { required: true, message: errorMessages.email.require },
+              {
+                pattern: regexConstant.validEmail,
+                message: errorMessages.email.pattern,
+              },
+            ]}
           >
             <Input
               prefix={<MailOutlined className="site-form-item-icon" />}
@@ -83,7 +136,13 @@ export default function Register() {
           <Form.Item
             name="phone"
             rules={[
-              { required: true, message: "Please input your Phone number!" },
+              { required: true, message: errorMessages.phone.required },
+              {
+                pattern: regexConstant.validPhone,
+                message: errorMessages.phone.pattern,
+              },
+              { max: 20, message: errorMessages.phone.maxlength },
+              { min: 9, message: errorMessages.phone.minlength },
             ]}
           >
             <Input
@@ -93,7 +152,7 @@ export default function Register() {
           </Form.Item>
           <Form.Item
             name="address"
-            rules={[{ required: true, message: "Please input your Address!" }]}
+            rules={[{ required: true, message: errorMessages.address.required }]}
           >
             <Input
               prefix={<EnvironmentOutlined className="site-form-item-icon" />}
@@ -114,7 +173,7 @@ export default function Register() {
         <div className="text-center">
           <p>
             Already have an account?{" "}
-            <Link className="text-blue-700" href="/log-in">
+            <Link className="text-blue-700 hover:text-orange-800" href="/log-in">
               Log in now!
             </Link>
           </p>
