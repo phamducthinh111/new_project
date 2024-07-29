@@ -56,12 +56,21 @@ export class UserService {
     return newUser;
   }
 
-  async findOneByUsername(username: string): Promise<User | undefined> {
+  async findOneByUsernameOfEpl(username: string): Promise<User | undefined> {
     return this.userRepository.findOne({
       where: {
         username,
         delFlag: false,
         role: Not(Role.user), // Điều kiện để loại trừ người dùng với role 'USER'
+      },
+    });
+  }
+
+  async findOneByUsername(username: string): Promise<User | undefined> {
+    return this.userRepository.findOne({
+      where: {
+        username,
+        delFlag: false,
       },
     });
   }

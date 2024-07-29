@@ -17,14 +17,6 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // async validateUser(username: string, password: string) {
-  //   const user = await this.usersService.findOneByUsername(username);
-  //   if (user && bcrypt.compareSync(password, user.password)) {
-  //     return user;
-  //   }
-  //   return null;
-  // }
-
   async validateUser(username: string): Promise<any> {
     try {
       if (!username) {
@@ -41,7 +33,42 @@ export class AuthService {
     }
   }
 
-  async login(payload: LoginDto): Promise<AuthResponse> {
+  async loginEmployee(payload: LoginDto): Promise<AuthResponse> {
+    const user = await this.usersService.findOneByUsernameOfEpl(payload.username);
+    if (!user) {
+      throw new UnauthorizedException('Username is incorrect or inactive');
+    }
+    const passwordMatches = await bcrypt.compareSync(
+      payload.password,
+      user.password,
+    );
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Password is incorrect');
+    }
+
+    if (user) {
+      const accessToken = this.getAccessToken(
+        user.username,
+        user.role,
+      );
+      const refreshToken = this.getRefreshToken(
+        user.username,
+        user.role,
+      );
+      const { email, role, phone, address, username } = user;
+      const token = {
+        access_Token: accessToken,
+        refresh_Token: refreshToken,
+      };
+      return {
+        // authUser,
+        token,
+      };
+    }
+    return null;
+  }
+
+  async loginUser(payload: LoginDto): Promise<AuthResponse> {
     const user = await this.usersService.findOneByUsername(payload.username);
     if (!user) {
       throw new UnauthorizedException('Username is incorrect or inactive');
@@ -118,7 +145,7 @@ export class AuthService {
     };
     const accessToken = this.jwtService.sign(payload, {
       secret: jwtConstants.secret,
-      expiresIn: '30m',
+      expiresIn: '3h',
     });
     return accessToken;
   }
