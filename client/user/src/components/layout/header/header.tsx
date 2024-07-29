@@ -25,65 +25,49 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Logo from "../../../../public/image/logo-coffee.png";
 import { useSelector } from "react-redux";
-import { RootState, useAppDispatch } from "@/store/store";
-import { useRouter } from "next/navigation";
-import {  logoutUser } from "@/store/action/user.action";
+import { RootState, useAppDispatch, useAppSelector } from "@/store/store";
+import { usePathname, useRouter } from "next/navigation";
+import { logoutUser } from "@/store/action/user.action";
 import Notification from "@/components/notification/NotificationComponent";
-
-const menuItems = [
-  {
-    id: "home",
-    title: "HOME",
-    path: "/",
-  },
-  {
-    id: "about",
-    title: "ABOUT",
-    path: "/about",
-  },
-  {
-    id: "product",
-    title: "PRODUCT",
-    path: "/product",
-  },
-  {
-    id: "contact",
-    title: "CONTACT",
-    path: "/contact",
-  },
-];
+import PageLoading from "@/components/loading/loading";
+import LanguageButton from "@/components/Language/languageButton";
 
 export default function PageHeader() {
   const router = useRouter();
-
-  const userProfile = useSelector((state: RootState) => state.user.userProfile);
-  const [isOpenDrawer, setIsOpenDrawer] = useState(false);
+  const pathname = usePathname();
+  const { userProfile } = useSelector((state: RootState) => state.user);
+  const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
+  const [isLoadingLogout, setIsLoadingLogout] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   const showDrawer = () => setIsOpenDrawer(true);
   const onClose = () => setIsOpenDrawer(false);
-
-  // useEffect(() => {
-  //   if (!userProfile) {
-  //     dispatch(fetchUserProfile()); // Fetch thông tin người dùng nếu không có trong state
-  //   }
-  // }, [dispatch, userProfile]);
+  const activeLanguage = useAppSelector((state) => state.languege.language);
+  const isLanguageVN = activeLanguage === "vn";
 
   const handleLogout = async () => {
     try {
+      setIsLoadingLogout(true);
       await dispatch(logoutUser()).unwrap();
-      Notification({ type: 'success', message: 'Success', description: 'Log out account successfully' });
+      Notification({
+        type: "success",
+        message: "Success",
+        description: isLanguageVN
+          ? "Đăng xuất tài khoản thành công"
+          : "Log out account successfully",
+      });
+      router.refresh();
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
+  if (isLoadingLogout) {
+    <PageLoading />;
+  }
+
   const items: MenuProps["items"] = [
     {
-      label: (
-        <Link href="/profile">
-          Profile
-        </Link>
-      ),
+      label: <Link href="/profile">{isLanguageVN ? "Hồ sơ" : "Profile"}</Link>,
       key: "profile",
       icon: <UserOutlined />,
     },
@@ -93,7 +77,7 @@ export default function PageHeader() {
     {
       label: (
         <Link href="/order-history">
-          Order history
+          {isLanguageVN ? "Lịch sử mua hàng" : "Order history"}
         </Link>
       ),
       key: "order-history",
@@ -104,10 +88,8 @@ export default function PageHeader() {
     },
     {
       label: (
-        <div 
-          onClick={handleLogout}
-        >
-          Log out
+        <div onClick={handleLogout}>
+          {isLanguageVN ? "Đăng xuất" : "Log Out"}
         </div>
       ),
       danger: true,
@@ -115,20 +97,47 @@ export default function PageHeader() {
       icon: <LogoutOutlined />,
     },
   ];
+
+  const menuItems = [
+    {
+      id: "home",
+      title: isLanguageVN ? "TRANG CHỦ" : "HOME",
+      path: "/",
+    },
+    {
+      id: "about",
+      title: isLanguageVN ? "VỀ CHÚNG TÔI" : " ABOUT",
+      path: "/about",
+    },
+    {
+      id: "product",
+      title: isLanguageVN ? "SẢN PHẨM" : "PRODUCT",
+      path: "/product",
+    },
+    {
+      id: "contact",
+      title: isLanguageVN ? "LIÊN HỆ" : "CONTACT",
+      path: "/contact",
+    },
+  ];
   return (
-    <div className="bg-stone-700 bg-opacity-50 px-8 text-slate-50 backdrop-blur-lg">
-      <Row className="items-center">
+    <div className="bg-stone-700 bg-opacity-50 text-slate-50 backdrop-blur-lg fixed top-0 left-0 w-full z-50">
+      <Row className="container mx-auto items-center">
         {/* Logo */}
         <Col
           xs={4}
           sm={4}
           md={4}
-          lg={6}
-          className="flex items-center justify-center lg:justify-start"
+          lg={7}
+          className="flex items-center justify-center lg:justify-center"
         >
           <div className="w-28">
-            <Image src={Logo} alt="logo"  />
+            <Image src={Logo} alt="logo" />
           </div>
+          <Input.Search
+            className="w-1/2 hidden lg:flex"
+            placeholder= {isLanguageVN ? "Nhập tên sản phẩm..." : "Input product name..."}
+          />
         </Col>
 
         {/* Menu Items for larger screens */}
@@ -144,7 +153,10 @@ export default function PageHeader() {
               <Link
                 key={item.id}
                 href={item.path}
-                className="text-base font-medium hover:text-orange-800 border-r border-gray-300 pr-8 last:border-r-0"
+                // onClick={() => handleMenuClick(item.id)}
+                className={`text-base font-medium hover:text-orange-800 border-r border-gray-300 pr-8 last:border-r-0 ${
+                  pathname === item.path ? "text-orange-800" : "text-white"
+                }`}
               >
                 {item.title}
               </Link>
@@ -173,26 +185,23 @@ export default function PageHeader() {
           xs={0}
           sm={0}
           md={0}
-          lg={6}
-          className="hidden lg:flex justify-start"
+          lg={5}
+          className="hidden lg:flex items-center justify-center"
         >
-          <Input.Search
-            className="w-3/5 mr-5"
-            placeholder="Input product name ..."
-          />
           {userProfile ? (
             <>
-              <Badge count={5} offset={[0, 10]} className="text-white mr-4">
+              <Badge count={5} offset={[0, 10]} className="text-white ">
                 <Button
                   type="link"
                   icon={<ShoppingCartOutlined style={{ fontSize: "24px" }} />}
                   className="text-white"
-                  onClick={()=>router.push('/cart')}
+                  onClick={() => router.push("/cart")}
                 />
               </Badge>
               <Dropdown menu={{ items }}>
                 <Button type="link" className="text-white">
-                  <Avatar className="pt-1"
+                  <Avatar
+                    className="ml-3"
                     icon={<UserOutlined style={{ fontSize: "20px" }} />}
                   />
                 </Button>
@@ -206,6 +215,12 @@ export default function PageHeader() {
               <UserOutlined style={{ fontSize: "24px" }} />
             </Link>
           )}
+          <div className=" w-1/2 flex justify-center">
+            <div>
+              <LanguageButton language="vn" />
+              <LanguageButton language="eng" />
+            </div>
+          </div>
         </Col>
 
         {/* Cart Button for small screens */}
@@ -220,7 +235,7 @@ export default function PageHeader() {
             <>
               <Dropdown menu={{ items }}>
                 <Button type="link" className="text-white">
-                  <Avatar icon={<UserOutlined />} />
+                  <Avatar className="" icon={<UserOutlined />} />
                 </Button>
               </Dropdown>
               <Badge count={5} offset={[0, 10]} className="text-white ">
@@ -260,13 +275,21 @@ export default function PageHeader() {
             <Link
               key={item.id}
               href={item.path}
-              className="block p-2 text-base font-medium hover:text-orange-800"
+              className={`block p-2 text-base font-medium hover:text-orange-800 ${
+                pathname === item.path ? "text-orange-800" : "text-white"
+              }`}
               onClick={onClose}
             >
               {item.title}
             </Link>
           ))}
           <Input.Search placeholder="Input product name ..." />
+        </div>
+        <div className="flex justify-start pt-5">
+          <div>
+            <LanguageButton language="vn" />
+            <LanguageButton language="eng" />
+          </div>
         </div>
       </Drawer>
     </div>

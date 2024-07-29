@@ -6,12 +6,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation } from "react-query";
-import { login, LoginForm } from "@/api/auth";
+import { login } from "@/api/auth";
 import { sessionToken } from "../../../../configs/AxiosClient";
 import { fetchUserProfile } from "@/store/action/user.action";
-import { useAppDispatch } from "@/store/store";
+import { useAppDispatch, useAppSelector } from "@/store/store";
 import { errorMessages } from "@/constants/error-messages.constants";
 import { regexConstant } from "@/constants/regex.constant";
+import { LoginForm } from "@/interface/user.interface";
 
 export default function Login() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export default function Login() {
   const [isLoadingConfirm, setIsLoadingConfirm] = useState<boolean>(false);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const dispatch = useAppDispatch();
+  const activeLanguage = useAppSelector((state) => state.languege.language);
+  const isLanguageVN = activeLanguage === "vn";
 
   const { mutate, isLoading } = useMutation(login, {
     onSuccess: async (newData) => {
@@ -76,7 +79,7 @@ export default function Login() {
   return (
     <div className="private-layout flex items-center justify-center">
       <div className="bg-white bg-opacity-80 p-8 rounded-md shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">{isLanguageVN?'Đăng nhập':'Login'}</h2>
         <Form
           form={form}
           name="normal_login"
@@ -93,7 +96,7 @@ export default function Login() {
           >
             <Input
               prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="username"
+              placeholder={isLanguageVN?'Tên tài khoản':"Username"}
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </Form.Item>
@@ -110,7 +113,7 @@ export default function Login() {
             <Input
               prefix={<LockOutlined className="site-form-item-icon" />}
               type="password"
-              placeholder="Password"
+              placeholder={isLanguageVN?'Mật khẩu':"Password"}
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </Form.Item>
@@ -121,15 +124,15 @@ export default function Login() {
               loading={isLoadingConfirm}
               className="login-form-button w-full bg-blue-700 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
-              Log in
+              {isLanguageVN?'Đăng nhập':'Log in'}
             </Button>
           </Form.Item>
         </Form>
         <div className="text-center">
           <p>
-            Don't have an account?{" "}
+            {isLanguageVN?`Bạn không có tài khoản? `:`Don't have an account? `}
             <Link className="text-blue-700 hover:text-orange-800" href="/register">
-              Register now!
+             {isLanguageVN?'Đăng ký ngay':` Register now!`}
             </Link>
           </p>
         </div>

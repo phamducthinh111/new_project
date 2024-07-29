@@ -1,19 +1,5 @@
+import { LoginForm, RegisterForm } from "@/interface/user.interface";
 import http from "../../configs/AxiosClient";
-
-export interface LoginForm {
-  username: string;
-  password: string;
-}
-
-export interface RegisterForm {
-  username: string;
-  password: string;
-  confirmPassword?: string;
-  email: string;
-  phone: string;
-  address: string;
-}
-
 
 export const login = async (req: LoginForm) => {
   const response = await http.post("auth/login-user", { body: req });
