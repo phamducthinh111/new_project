@@ -2,7 +2,7 @@
 const nextConfig = {
     reactStrictMode: true,
     images: {
-      domains: ['localhost'],
+      domains: ['localhost','t3.ftcdn.net'],
     },
     compiler: {
       styledComponents: true,

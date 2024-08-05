@@ -1,21 +1,39 @@
 "use client";
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import userReducer from "./reducer/userReducer";
 import { persistStore, persistReducer } from 'redux-persist';
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import storage from "redux-persist/lib/storage";
-import rootReducer from "./reducer/rootReducer";
+import storageSession from "redux-persist/lib/storage/session";
+import languageReducer from "./reducer/languageReducer";
+import productReducer from "./reducer/productReducer";
 
-const persistConfig = {
-  key: 'root',
-  storage, // hoặc sessionStorage nếu bạn muốn dùng
+// const persistConfig = {
+//   key: 'root',
+//   storage: storageSession,
+// };
+
+const userPersistConfig = {
+  key: 'user',
+  storage: storageSession,
 };
 
+const languagePersistConfig = {
+  key: 'language',
+  storage: storageSession,
+};
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const userPersistedReducer = persistReducer(userPersistConfig, userReducer);
+const languagePersistedReducer = persistReducer(languagePersistConfig, languageReducer);
+
+
+const rootReducer = combineReducers({
+  user: userPersistedReducer,
+  languege: languagePersistedReducer,
+  product: productReducer,
+});
 
 const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck:false

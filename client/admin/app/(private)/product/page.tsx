@@ -135,7 +135,7 @@ export default function Product() {
       <Row justify="center">
         {productData &&
           productData.map((product: any, index: number) => (
-            <Col span={8} key={index} className="p-2">
+            <Col span={6} key={index} className="p-2 flex justify-center" >
               <ProductCard productDentail={product} refreshData={()=>setRefreshData(true)} />
             </Col>
           ))}

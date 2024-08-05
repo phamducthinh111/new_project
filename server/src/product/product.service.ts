@@ -112,7 +112,11 @@ export class ProductService {
     return await this.productRepository.save(findProduct);
   }
 
-  async getAllProduct(currentUserId: number, name?: string, delFlag?: boolean) {
+  async getAllProductPageAdmin(
+    currentUserId: number,
+    name?: string,
+    delFlag?: boolean,
+  ) {
     const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
@@ -120,7 +124,7 @@ export class ProductService {
 
     if (delFlag && findUser.role !== Role.admin) {
       throw new NotFoundException(
-        `Account doesn't have permission to view deleted users`,
+        `Account doesn't have permission to view deleted product`,
       );
     }
 
@@ -137,9 +141,10 @@ export class ProductService {
         'product.createUser',
         'product.updateDate',
         'product.updateUser',
+        'product.price',
       ])
       .leftJoinAndSelect('product.imageUrl', 'imageUrl'); // Nếu cần lấy cả imageUrl
-    
+
     // Thêm điều kiện delFlag nếu được cung cấp
     if (delFlag !== undefined) {
       queryBuilder.where('product.delFlag = :delFlag', { delFlag });
@@ -150,6 +155,62 @@ export class ProductService {
       queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:query)', {
         query: `%${name}%`,
       });
+    }
+
+    // Lấy kết quả
+    const result = await queryBuilder.getMany();
+    return result;
+  }
+
+  async getAllProductPageUser(
+    name?: string,
+    typeName?: string,
+    minPrice?:number,
+    maxPrice?: number,
+    delFlag?: boolean,
+  ) {
+    // Tạo query builder
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('product')
+      .select([
+        'product.productId',
+        'product.name',
+        'product.typeName',
+        'product.delFlag',
+        'product.quantity',
+        'product.createDate',
+        'product.createUser',
+        'product.updateDate',
+        'product.updateUser',
+        'product.price',
+      ])
+      .leftJoinAndSelect('product.imageUrl', 'imageUrl'); // Nếu cần lấy cả imageUrl
+
+    // Thêm điều kiện delFlag nếu được cung cấp
+    if (delFlag !== undefined) {
+      queryBuilder.where('product.delFlag = :delFlag', { delFlag });
+    }
+
+    // Thêm điều kiện tìm kiếm nếu có query
+    if (name) {
+      queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:query)', {
+        query: `%${name}%`,
+      });
+    }
+
+    if (typeName) {
+      queryBuilder.andWhere('product.typeName = :typeName', { typeName });
+    }
+
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      queryBuilder.andWhere('product.price BETWEEN :minPrice AND :maxPrice', {
+        minPrice,
+        maxPrice,
+      });
+    } else if (minPrice !== undefined) {
+      queryBuilder.andWhere('product.price >= :minPrice', { minPrice });
+    } else if (maxPrice !== undefined) {
+      queryBuilder.andWhere('product.price <= :maxPrice', { maxPrice });
     }
 
     // Lấy kết quả
@@ -186,12 +247,12 @@ export class ProductService {
   async findProductByIdForOrder(productId: number) {
     return await this.productRepository.findOne({
       select: {
-        productId : true,
-        name : true,
-        price : true,
-        imageUrl : true,
-        typeName : true,
-        label : true,
+        productId: true,
+        name: true,
+        price: true,
+        imageUrl: true,
+        typeName: true,
+        label: true,
       },
       where: { productId },
       relations: ['imageUrl'],

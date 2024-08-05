@@ -27,7 +27,6 @@ import { Public } from 'src/libs/decorators/public.decorators';
 import { CurrentUser } from 'src/libs/decorators/current-user.decorator';
 
 @Controller('product')
-
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -39,7 +38,10 @@ export class ProductController {
     @Res() res: Response,
   ) {
     try {
-      const result = await this.productService.createProduct(currentUserId, createProductDto);
+      const result = await this.productService.createProduct(
+        currentUserId,
+        createProductDto,
+      );
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
@@ -68,7 +70,7 @@ export class ProductController {
       const result = await this.productService.upLoadListImage(
         currentUserId,
         productId,
-        file.destination + '/' + file.filename
+        file.destination + '/' + file.filename,
       );
       return res.send(ResponseObject.success(result));
     } catch (error) {
@@ -97,14 +99,14 @@ export class ProductController {
       const result = await this.productService.upLoadTopicImage(
         currentUserId,
         productId,
-        file.destination + '/' + file.filename
+        file.destination + '/' + file.filename,
       );
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
       return res
-      .status(HttpStatus.BAD_REQUEST)
-      .send(ResponseObject.fail(error.response.message));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -117,7 +119,10 @@ export class ProductController {
   ) {
     try {
       const delFlagValue = delFlag === 'true' ? true : false;
-      const result = await this.productService.getSearchSuggestions(name, delFlagValue);
+      const result = await this.productService.getSearchSuggestions(
+        name,
+        delFlagValue,
+      );
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
@@ -127,9 +132,8 @@ export class ProductController {
     }
   }
 
-  // @Public()
   @Get()
-  async getAllProduct(
+  async getAllProductPageAdmin(
     @Res() res: Response,
     @CurrentUser('userId') currentUserId,
     @Query('name') name?: string,
@@ -137,13 +141,45 @@ export class ProductController {
   ) {
     try {
       const delFlagValue = delFlag === 'true';
-      const result = await this.productService.getAllProduct(currentUserId, name, delFlagValue, );
+      const result = await this.productService.getAllProductPageAdmin(
+        currentUserId,
+        name,
+        delFlagValue,
+      );
       return res.send(ResponseObject.success(result));
     } catch (error) {
       console.log(error);
       return res
-      .status(HttpStatus.BAD_REQUEST)
-      .send(ResponseObject.fail(error.response.message));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
+    }
+  }
+
+  @Public()
+  @Get('user')
+  async getAllProductPageUser(
+    @Res() res: Response,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
+    @Query('typeName') typeName?: string,
+    @Query('name') name?: string,
+    @Query('delFlag') delFlag?: string,
+  ) {
+    try {
+      const delFlagValue = delFlag === 'true';
+      const result = await this.productService.getAllProductPageUser(
+        name,
+        typeName,
+        minPrice,
+        maxPrice,
+        delFlagValue,
+      );
+      return res.send(ResponseObject.success(result));
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -163,8 +199,8 @@ export class ProductController {
     } catch (error) {
       console.log(error);
       return res
-      .status(HttpStatus.BAD_REQUEST)
-      .send(ResponseObject.fail(error.response.message));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -185,8 +221,8 @@ export class ProductController {
     } catch (error) {
       console.log(error);
       return res
-      .status(HttpStatus.BAD_REQUEST)
-      .send(ResponseObject.fail(error.response.message));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -212,7 +248,6 @@ export class ProductController {
     @Res() res: Response,
     @Param('productId') productId: any,
     @CurrentUser('userId') currentUserId,
-
   ) {
     try {
       await this.productService.removeProduct(currentUserId, productId);
@@ -220,8 +255,8 @@ export class ProductController {
     } catch (error) {
       console.log(error);
       return res
-      .status(HttpStatus.BAD_REQUEST)
-      .send(ResponseObject.fail(error.response.message));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -230,16 +265,18 @@ export class ProductController {
     @Res() res: Response,
     @Param('productId') productId: any,
     @CurrentUser('userId') currentUserId,
-
   ) {
     try {
-      await this.productService.rollBackProductByAdmin(currentUserId, productId);
+      await this.productService.rollBackProductByAdmin(
+        currentUserId,
+        productId,
+      );
       return res.send(ResponseObject.success('Product rollback successfully'));
     } catch (error) {
       console.log(error);
       return res
-      .status(HttpStatus.BAD_REQUEST)
-      .send(ResponseObject.fail(error.response.message));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
 
@@ -248,7 +285,6 @@ export class ProductController {
     @Res() res: Response,
     @Param('productId') productId: any,
     @CurrentUser('userId') currentUserId,
-
   ) {
     try {
       await this.productService.deleteProduct(currentUserId, productId);
@@ -256,8 +292,8 @@ export class ProductController {
     } catch (error) {
       console.log(error);
       return res
-      .status(HttpStatus.BAD_REQUEST)
-      .send(ResponseObject.fail(error.response.message));
+        .status(HttpStatus.BAD_REQUEST)
+        .send(ResponseObject.fail(error.response.message));
     }
   }
 }

@@ -1,24 +1,34 @@
-// import http from "../../configs/AxiosClient";
+import { TypeProduct } from "@/interface/product.interface";
+import http from "../../configs/AxiosClient";
 
-// export const getAllProduct = async (name?: string,delFlag? :boolean) => {
-//     const response = await http.get("product", {
-//       params: {
-//         name: name,
-//         delFlag: delFlag
-//       }
-//     });
-//     return response.data;
-// }
+export const getAllProduct = async (
+  name?: string,
+  typeName?: TypeProduct,
+  minPrice? :number,
+  maxPrice? :number,
+  delFlag?: boolean
+) => {
+  const response = await http.get("product/user", {
+    params: {
+      name: name,
+      typeName: typeName,
+      delFlag: delFlag,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+    },
+  });
+  return response.data;
+};
 
-// export const getSearchSuggestions  = async (name: string, delFlag?: boolean) => {
-//   const response = await http.get(`product/search`,{
-//     params: {
-//       name: name,
-//       delFlag: delFlag
-//     }
-//   });
-//   return response.data;
-// }
+export const getSearchSuggestions = async (name: string, delFlag?: boolean) => {
+  const response = await http.get(`product/search`, {
+    params: {
+      name: name,
+      delFlag: delFlag,
+    },
+  });
+  return response.data;
+};
 
 // export const getProductDentail = async (productId: number) => {
 //     const response = await http.get(`product/${productId}`);
@@ -39,7 +49,6 @@
 
 // //   return response;
 // // };
-
 
 // export const updateListImgGallery = async (productId: number, file: File) => {
 //   const formData = new FormData();

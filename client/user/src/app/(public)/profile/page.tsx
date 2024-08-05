@@ -21,17 +21,22 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import dayjs from "dayjs";
 import convertSexToVietnamese from "./_components/convertSex";
 import AccountInfomation from "./_components/account.info";
-import AccountEdit from "./_components/acccount.edit";
+import AccountEdit from "./_components/account.edit";
 import { UserProfile } from "@/interface/user.interface";
 import { useDispatch } from "react-redux";
-import { fetchUserProfile, updateProfileAction } from "@/store/action/user.action";
+import {
+  fetchUserProfile,
+  updateProfileAction,
+} from "@/store/action/user.action";
 import Notification from "@/components/notification/NotificationComponent";
-
+import ChangePasswordForm from "./_components/changePassword";
+import { changePassword } from "@/api/profile";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 const Profile: React.FC = () => {
   const [profileForm] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const activeLanguage = useAppSelector((state) => state.languege.language);
   const userProfile = useAppSelector((state) => state.user.userProfile);
   const isLanguageVN = activeLanguage === "vn";
@@ -39,6 +44,8 @@ const Profile: React.FC = () => {
   const [isEditAccoutn, setIsEditAccount] = useState<boolean>(false);
   const [isDisableSave, setIsDisableSave] = useState<boolean>(true);
   const [changedValues, setChangedValues] = useState<Partial<UserProfile>>({});
+  const [isDisableSaveChangePassword, setIsDisableSaveChangePassword] =
+  useState<boolean>(true);
   const dispatch = useAppDispatch();
 
   // useEffect(() => {
@@ -73,7 +80,9 @@ const Profile: React.FC = () => {
         Notification({
           type: "success",
           message: "Success",
-          description: isLanguageVN ?' Cập nhật thông tin tài khoản thành công' :"Update account successfully",
+          description: isLanguageVN
+            ? " Cập nhật thông tin tài khoản thành công"
+            : "Update account successfully",
         });
         setIsEditAccount(false);
       }
@@ -82,13 +91,54 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleButtonAccountClick = () => {
+  const handleButtonChangePasswordClick = () => {
     setIsButtonAccount(true);
     setIsEditAccount(false);
+    passwordForm.resetFields();
     profileForm.resetFields();
   };
   const handleButtonAndressClick = () => {
     setIsButtonAccount(false);
+  };
+
+  const onFieldsChangePassword = () => {
+    const fieldErrors = passwordForm.getFieldsError();
+    const hasFieldErrors = fieldErrors.some(
+      ({ errors }) => errors && errors.length > 0
+    );
+    const { oldPassword, newPassword, confirmPassword } =
+    passwordForm.getFieldsValue();
+    const isAnyFieldEmpty = !oldPassword || !newPassword || !confirmPassword;
+    setIsDisableSaveChangePassword(isAnyFieldEmpty || hasFieldErrors);
+  };
+
+  const handleSaveChangePassword = async () => {
+    const { oldPassword, newPassword } = passwordForm.getFieldsValue();
+    const body = {
+      currentPassword: oldPassword,
+      newPassword: newPassword,
+    };
+    try {
+      const response = await changePassword(body);
+      if (response) {
+        Notification({
+          type: "success",
+          message: "Success",
+          description: isLanguageVN
+            ? " Đổi mật khẩu thành công"
+            : "Change Password successfully",
+        });
+        setIsButtonAccount(true);
+      }
+    } catch (error: any) {
+      console.error(error);
+      passwordForm.setFields([
+        {
+          name: "oldPassword",
+          errors: [error.message],
+        },
+      ]);
+    }
   };
 
   // Chuyển đổi giới tính nếu là tiếng Việt
@@ -105,7 +155,7 @@ const Profile: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto lg:w-3/4 my-10 bg-stone-700 bg-opacity-70 backdrop-blur-lg rounded-lg">
+    <div className="container mx-auto lg:w-3/4 my-10 bg-stone-700 bg-opacity-70 backdrop-blur-lg rounded-lg h-100">
       <Row className="">
         <Col
           xs={24}
@@ -121,7 +171,7 @@ const Profile: React.FC = () => {
                 className={`text-xl ${
                   isButtonAccount ? "text-orange-800" : "text-white"
                 }`}
-                onClick={() => handleButtonAccountClick()}
+                onClick={() => handleButtonChangePasswordClick()}
               >
                 {isLanguageVN ? "Quản lý tài khoản" : "Account Management"}
               </Button>
@@ -134,25 +184,33 @@ const Profile: React.FC = () => {
                 }`}
                 onClick={() => handleButtonAndressClick()}
               >
-                {isLanguageVN ? "Sổ địa chỉ" : "Addresss"}
+                {isLanguageVN ? "Đổi mật khẩu" : "Change password"}
               </Button>
             </div>
           </div>
         </Col>
         <Col xs={24} sm={24} md={24} lg={19} className=" p-5 pb-10">
-          {isEditAccoutn ? (
-            <AccountEdit
-              form={profileForm}
-              onFieldsChange={onFieldsChangeEditAccount}
-              onValuesChange={onValuesChangeEditAccount}
-              handleSaveEditAccount={handleSaveEditAccount}
-              isDisableSave={isDisableSave}
-            />
+          {isButtonAccount ? (
+            isEditAccoutn ? (
+              <AccountEdit
+                form={profileForm}
+                onFieldsChange={onFieldsChangeEditAccount}
+                onValuesChange={onValuesChangeEditAccount}
+                handleSaveEditAccount={handleSaveEditAccount}
+                isDisableSave={isDisableSave}
+              />
+            ) : (
+              <AccountInfomation
+                setIsEditAccount={() => setIsEditAccount(true)}
+                setIsDisableSave={() => setIsDisableSave(true)}
+              />
+            )
           ) : (
-            <AccountInfomation
-              setIsEditAccount={() => setIsEditAccount(true)}
-              setIsDisableSave={() => setIsDisableSave(true)}
-            />
+            <ChangePasswordForm
+            isDisableSaveChangePassword= {isDisableSaveChangePassword}
+            form={passwordForm}
+            onFieldsChange={onFieldsChangePassword}
+            handleSaveChangePassword={handleSaveChangePassword} />
           )}
         </Col>
       </Row>

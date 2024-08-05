@@ -60,11 +60,11 @@ export default function Home() {
           </>
         )}
       </div>
-      <Row className="justify-center xl:m-20 ">
+      <Row className="justify-center lg:m-20 my-5 ">
         <Col
           xs={24}
           sm={12}
-          md={5}
+          md={12}
           lg={5}
           className="bg-stone-700 rounded-md flex items-center mx-2 mb-4 lg:mb-0"
         >
@@ -121,7 +121,7 @@ export default function Home() {
         <Col
           xs={24}
           sm={12}
-          md={5}
+          md={12}
           lg={5}
           className="bg-[#B89D64] rounded-md flex items-center mx-2 mb-4 lg:mb-0"
         >
@@ -166,7 +166,7 @@ export default function Home() {
         <Col
           xs={24}
           sm={12}
-          md={5}
+          md={12}
           lg={5}
           className="bg-[#513826] rounded-md flex items-center mx-2 mb-4 lg:mb-0"
         >
@@ -215,7 +215,7 @@ export default function Home() {
         <Col
           xs={24}
           sm={12}
-          md={5}
+          md={12}
           lg={5}
           className="bg-[#846149] rounded-md flex items-center mx-2 mb-4 lg:mb-0"
         >
