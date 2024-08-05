@@ -20,10 +20,16 @@ interface AccountEditProps {
   onFieldsChange: () => void;
   onValuesChange: (changed: UserProfile) => void;
   isDisableSave: boolean;
-  handleSaveEditAccount: () => void
+  handleSaveEditAccount: () => void;
 }
 const AccountEdit = (props: AccountEditProps) => {
-  const { form, onFieldsChange, isDisableSave, onValuesChange, handleSaveEditAccount } = props;
+  const {
+    form,
+    onFieldsChange,
+    isDisableSave,
+    onValuesChange,
+    handleSaveEditAccount,
+  } = props;
   const activeLanguage = useAppSelector((state) => state.languege.language);
   const userProfile = useAppSelector((state) => state.user.userProfile);
   const isLanguageVN = activeLanguage === "vn";
@@ -45,19 +51,24 @@ const AccountEdit = (props: AccountEditProps) => {
             <Form.Item
               name="username"
               label={
-                <strong className="text-white text-base">
+                <strong className="text-[#E8CA72] text-base">
                   {isLanguageVN ? "Tên tài khoản" : "Username"}
                 </strong>
               }
             >
-              <StyledInput disabled readOnly size="large" placeholder="Username" />
+              <StyledInput
+                disabled
+                readOnly
+                size="large"
+                placeholder="Username"
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={24} lg={12}>
             <Form.Item
               name="fullname"
               label={
-                <strong className="text-white text-base">
+                <strong className="text-[#E8CA72] text-base">
                   {isLanguageVN ? "Họ và tên" : "Fullname"}
                 </strong>
               }
@@ -75,7 +86,7 @@ const AccountEdit = (props: AccountEditProps) => {
             <Form.Item
               name="email"
               label={
-                <strong className="text-white text-base">
+                <strong className="text-[#E8CA72] text-base">
                   {isLanguageVN ? "Email" : "Email"}
                 </strong>
               }
@@ -87,7 +98,7 @@ const AccountEdit = (props: AccountEditProps) => {
             <Form.Item
               name="phone"
               label={
-                <strong className="text-white text-base">
+                <strong className="text-[#E8CA72] text-base">
                   {isLanguageVN ? "Số điện thoại" : "Phone"}
                 </strong>
               }
@@ -105,7 +116,7 @@ const AccountEdit = (props: AccountEditProps) => {
             <Form.Item
               name="sex"
               label={
-                <strong className="text-white text-base">
+                <strong className="text-[#E8CA72] text-base">
                   {isLanguageVN ? "Giới tính" : "Sex"}
                 </strong>
               }
@@ -127,12 +138,31 @@ const AccountEdit = (props: AccountEditProps) => {
             <Form.Item
               name="birthday"
               label={
-                <strong className="text-white text-base">
+                <strong className="text-[#E8CA72] text-base">
                   {isLanguageVN ? "Ngày sinh" : "Birthday"}
                 </strong>
               }
             >
               <DatePicker size="large" className="w-full" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} sm={24} md={24} lg={24}>
+            <Form.Item
+              name="address"
+              label={
+                <strong className="text-[#E8CA72] text-base">
+                  {isLanguageVN ? "Địa chỉ" : "Address"}
+                </strong>
+              }
+            >
+              <StyledInput.TextArea
+                autoSize={{ minRows: 3, maxRows: 5 }}
+                size="large"
+                placeholder={isLanguageVN ? "Địa chỉ..." : "Address..."}
+              />
             </Form.Item>
           </Col>
         </Row>
@@ -144,9 +174,9 @@ const AccountEdit = (props: AccountEditProps) => {
             size="large"
             type="primary"
             htmlType="submit"
-            className="w-full text-base text-white"
+            className="w-full text-base text-[#E8CA72]"
           >
-            Save
+            {isLanguageVN ? "Lưu" : "Save"}
           </StyledButtonSave>
         </Form.Item>
       </Form>

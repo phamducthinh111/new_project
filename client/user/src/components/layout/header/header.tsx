@@ -10,6 +10,7 @@ import {
   Menu,
   Dropdown,
   MenuProps,
+  AutoComplete,
 } from "antd";
 import {
   SearchOutlined,
@@ -31,6 +32,8 @@ import { logoutUser } from "@/store/action/user.action";
 import Notification from "@/components/notification/NotificationComponent";
 import PageLoading from "@/components/loading/loading";
 import LanguageButton from "@/components/Language/languageButton";
+import { getSearchSuggestions } from "@/api/product";
+import { ProductDetail } from "@/interface/product.interface";
 
 export default function PageHeader() {
   const router = useRouter();
@@ -38,6 +41,8 @@ export default function PageHeader() {
   const { userProfile } = useSelector((state: RootState) => state.user);
   const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
   const [isLoadingLogout, setIsLoadingLogout] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [suggestions, setSuggestions] = useState<ProductDetail[]>([]);
   const dispatch = useAppDispatch();
   const showDrawer = () => setIsOpenDrawer(true);
   const onClose = () => setIsOpenDrawer(false);
@@ -58,6 +63,18 @@ export default function PageHeader() {
       router.refresh();
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+  };
+
+  const handleSearchChange = async (value: string) => {
+    setSearchValue(value);
+    if (value) {
+      const response = await getSearchSuggestions(value);
+      if (response) {
+        setSuggestions(response);
+      }
+    } else {
+      setSuggestions([]);
     }
   };
 
@@ -134,10 +151,19 @@ export default function PageHeader() {
           <div className="w-28">
             <Image src={Logo} alt="logo" />
           </div>
-          <Input.Search
-            className="w-1/2 hidden lg:flex"
-            placeholder= {isLanguageVN ? "Nhập tên sản phẩm..." : "Input product name..."}
-          />
+          <AutoComplete
+            className="w-3/5"
+            onSearch={handleSearchChange}
+            options={suggestions.map((item) => ({ value: item.name }))}
+            onSelect={(value) => setSearchValue(value)}
+          >
+            <Input.Search
+              className="w-1/2 hidden lg:flex"
+              placeholder={
+                isLanguageVN ? "Nhập tên sản phẩm..." : "Input product name..."
+              }
+            />
+          </AutoComplete>
         </Col>
 
         {/* Menu Items for larger screens */}
@@ -265,9 +291,7 @@ export default function PageHeader() {
         width={256}
         style={{
           backgroundColor: "#44403C",
-          color: "#ffffff",
           backdropFilter: "blur(10px)",
-          opacity: 0.9,
         }}
       >
         <div className="flex flex-col items-start space-y-4">
@@ -283,8 +307,20 @@ export default function PageHeader() {
               {item.title}
             </Link>
           ))}
-          <Input.Search placeholder="Input product name ..." />
+          <AutoComplete
+            onSearch={handleSearchChange}
+            options={suggestions.map((item) => ({ value: item.name }))}
+            onSelect={(value) => setSearchValue(value)}
+          >
+            <Input.Search
+              className=""
+              placeholder={
+                isLanguageVN ? "Nhập tên sản phẩm..." : "Input product name..."
+              }
+            />
+          </AutoComplete>
         </div>
+
         <div className="flex justify-start pt-5">
           <div>
             <LanguageButton language="vn" />
