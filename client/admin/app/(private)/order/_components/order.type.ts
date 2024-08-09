@@ -18,7 +18,8 @@ export interface OrderDentail {
   status: OrderStatus;
   totalPrice: number;
   desc: string | null;
-  user: UserProfile,
+  user: UserProfile;
+  note?: string;
   orderItems: OrderItem[];
 }
 

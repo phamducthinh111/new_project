@@ -157,8 +157,9 @@ export class OrderController {
     @Param('orderId') orderId: number,
   ) {
     try {
-      const result = await this.orderService.getSummary(
-        currentUserId
+      const result = await this.orderService.deleteOrder(
+        currentUserId,
+        orderId
       );
       return res.send(ResponseObject.success(result));
     } catch (error) {

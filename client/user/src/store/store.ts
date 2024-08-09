@@ -6,6 +6,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import storageSession from "redux-persist/lib/storage/session";
 import languageReducer from "./reducer/languageReducer";
 import productReducer from "./reducer/productReducer";
+import cartReducer from "./reducer/cartReducer";
 
 // const persistConfig = {
 //   key: 'root',
@@ -22,14 +23,21 @@ const languagePersistConfig = {
   storage: storageSession,
 };
 
+const cartPersistConfig = {
+  key: 'cart',
+  storage: storageSession,
+};
+
 const userPersistedReducer = persistReducer(userPersistConfig, userReducer);
 const languagePersistedReducer = persistReducer(languagePersistConfig, languageReducer);
+const cartPersistedReducer = persistReducer(cartPersistConfig,cartReducer)
 
 
 const rootReducer = combineReducers({
   user: userPersistedReducer,
   languege: languagePersistedReducer,
   product: productReducer,
+  cart: cartPersistedReducer,
 });
 
 const store = configureStore({

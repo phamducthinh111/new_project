@@ -24,7 +24,6 @@ export default function Order() {
   const [orderDentail, setOrderDentail] = useState<OrderDentail>();
 
 
-
   const activeProduct = true;
   const dateFormat = "DD/MM/YYYY";
 
@@ -93,7 +92,7 @@ export default function Order() {
     try {
       const response = await deleteOrder(orderDentail?.orderId);
       if (response) {
-        message.success(`Rollback order successfully`);
+        message.success(`Delete order successfully`);
         setIsOpenPopupDelete(false);
         setRefreshData(true);
       }

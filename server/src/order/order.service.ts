@@ -33,7 +33,7 @@ export class OrderService {
   ) {}
 
   async createOrder(currentUserId: number, createOrderDto: CreateOrderDto) {
-    const { orderItemsData } = createOrderDto;
+    const { orderItemsData, note } = createOrderDto;
     const findUser = await this.userService.findOneById(currentUserId);
     if (!findUser) {
       throw new NotFoundException(`User with id ${currentUserId} not found`);
@@ -46,6 +46,7 @@ export class OrderService {
     newOrder.createUser = findUser.username;
     newOrder.updateDate = new Date();
     newOrder.updateUser = findUser.username;
+    newOrder.note = note
 
     const orderItems: OrderItem[] = [];
     for (const itemData of orderItemsData) {

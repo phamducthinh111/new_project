@@ -183,6 +183,7 @@ export class ProductController {
     }
   }
 
+  @Public()
   @Get(':productId')
   async getProductById(
     @Res() res: Response,

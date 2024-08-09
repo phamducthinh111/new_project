@@ -7,16 +7,13 @@ import {
   Input,
   Badge,
   Avatar,
-  Menu,
   Dropdown,
   MenuProps,
   AutoComplete,
 } from "antd";
 import {
-  SearchOutlined,
   MenuOutlined,
   ShoppingCartOutlined,
-  LoginOutlined,
   UserOutlined,
   HistoryOutlined,
   LogoutOutlined,
@@ -34,11 +31,13 @@ import PageLoading from "@/components/loading/loading";
 import LanguageButton from "@/components/Language/languageButton";
 import { getSearchSuggestions } from "@/api/product";
 import { ProductDetail } from "@/interface/product.interface";
+import { StyledButtonCart, StyledButtonLogin } from "./header.style";
 
 export default function PageHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const { userProfile } = useSelector((state: RootState) => state.user);
+  const { totalProduct } = useAppSelector((state: RootState) => state.cart);
   const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
   const [isLoadingLogout, setIsLoadingLogout] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -75,6 +74,25 @@ export default function PageHeader() {
       }
     } else {
       setSuggestions([]);
+    }
+  };
+
+  // const handleSelectClick = (item:ProductDetail) => {
+  //   router.push(`/product/${item.productId}`);
+  //   setSearchValue('')
+  //   isOpenDrawer && setIsOpenDrawer(false);
+  // };
+  const handleSelectClick = (item: {
+    value: string;
+    label: React.ReactNode;
+  }) => {
+    const selectedProduct = suggestions.find(
+      (suggestion) => suggestion.name === item.value
+    );
+    if (selectedProduct) {
+      router.push(`/product/${selectedProduct.productId}`);
+      setSearchValue("");
+      isOpenDrawer && setIsOpenDrawer(false);
     }
   };
 
@@ -154,8 +172,18 @@ export default function PageHeader() {
           <AutoComplete
             className="w-3/5"
             onSearch={handleSearchChange}
-            options={suggestions.map((item) => ({ value: item.name }))}
-            onSelect={(value) => setSearchValue(value)}
+            options={suggestions.map((item) => ({
+              value: item.name,
+              label: (
+                <div
+                  // onClick={() => handleSelectClick(item)}
+                  className="cursor-pointer font-medium"
+                >
+                  {item.name}
+                </div>
+              ),
+            }))}
+            onSelect={(value, option) => handleSelectClick(option)}
           >
             <Input.Search
               className="w-1/2 hidden lg:flex"
@@ -179,7 +207,6 @@ export default function PageHeader() {
               <Link
                 key={item.id}
                 href={item.path}
-                // onClick={() => handleMenuClick(item.id)}
                 className={`text-base font-medium hover:text-orange-800 border-r border-gray-300 pr-8 last:border-r-0 ${
                   pathname === item.path ? "text-orange-800" : "text-white"
                 }`}
@@ -214,16 +241,16 @@ export default function PageHeader() {
           lg={5}
           className="hidden lg:flex items-center justify-center"
         >
+          <Badge count={totalProduct} offset={[0, 10]} className="text-white ">
+            <StyledButtonCart
+              type="link"
+              icon={<ShoppingCartOutlined style={{ fontSize: "24px" }} />}
+              className="text-white"
+              onClick={() => router.push("/cart")}
+            />
+          </Badge>
           {userProfile ? (
             <>
-              <Badge count={5} offset={[0, 10]} className="text-white ">
-                <Button
-                  type="link"
-                  icon={<ShoppingCartOutlined style={{ fontSize: "24px" }} />}
-                  className="text-white"
-                  onClick={() => router.push("/cart")}
-                />
-              </Badge>
               <Dropdown menu={{ items }}>
                 <Button type="link" className="text-white">
                   <Avatar
@@ -234,12 +261,16 @@ export default function PageHeader() {
               </Dropdown>
             </>
           ) : (
-            <Link
-              className="text-white flex hover:text-orange-800"
-              href="/log-in"
-            >
-              <UserOutlined style={{ fontSize: "24px" }} />
-            </Link>
+            <>
+              <StyledButtonLogin
+                // className="text-white flex hover:text-orange-800"
+                className="ml-3"
+                href="/log-in"
+                type="link"
+              >
+                <UserOutlined style={{ fontSize: "20px" }} />
+              </StyledButtonLogin>
+            </>
           )}
           <div className=" w-1/2 flex justify-center">
             <div>
@@ -264,11 +295,16 @@ export default function PageHeader() {
                   <Avatar className="" icon={<UserOutlined />} />
                 </Button>
               </Dropdown>
-              <Badge count={5} offset={[0, 10]} className="text-white ">
-                <Button
+              <Badge
+                count={totalProduct}
+                offset={[0, 10]}
+                className="text-white "
+              >
+                <StyledButtonCart
                   type="link"
                   icon={<ShoppingCartOutlined style={{ fontSize: "24px" }} />}
                   className="text-white"
+                  onClick={() => router.push("/cart")}
                 />
               </Badge>
             </>
@@ -309,8 +345,18 @@ export default function PageHeader() {
           ))}
           <AutoComplete
             onSearch={handleSearchChange}
-            options={suggestions.map((item) => ({ value: item.name }))}
-            onSelect={(value) => setSearchValue(value)}
+            options={suggestions.map((item) => ({
+              value: item.name,
+              label: (
+                <div
+                  // onClick={() => handleSelectClick(item)}
+                  className="cursor-pointer font-medium"
+                >
+                  {item.name}
+                </div>
+              ),
+            }))}
+            onSelect={(value, option) => handleSelectClick(option)}
           >
             <Input.Search
               className=""

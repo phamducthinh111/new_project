@@ -3,6 +3,7 @@ import { ProductDetail } from "@/interface/product.interface";
 import Image from "next/image";
 import { formatVND } from "@/constants/formatVND.constants";
 import { useAppSelector } from "@/store/store";
+import { useRouter } from "next/navigation";
 
 const { Meta } = Card;
 
@@ -11,6 +12,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ productDetail }) => {
+  const router = useRouter();
   const activeLanguage = useAppSelector((state) => state.languege.language);
   const isLanguageVN = activeLanguage === "vn";
   return (
@@ -21,8 +23,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ productDetail }) => {
           <p className="text-base">{productDetail.name}</p>
         </div>
       }
-      className="border-2 border-gray-300 rounded-lg w-80 flex flex-col transition-transform duration-300 transform hover:scale-105"
+      className="border-2 border-gray-300 rounded-lg lg:w-80 w-full flex flex-col transition-transform duration-300 transform hover:scale-105"
       hoverable
+      onClick={() => router.push(`product/${productDetail.productId}`)}
       cover={
         productDetail.imageUrl &&
         productDetail.imageUrl.filter((img) => img.imageType === "thumbnail")
@@ -59,9 +62,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ productDetail }) => {
       }
     >
       <div className="text-center">
-      <span className={`text-xl italic ${productDetail.quantity === 0 && ' text-red-500' }`}>
-  {productDetail.quantity !== 0 ? formatVND(productDetail.price) : (isLanguageVN ? 'Hết hàng' : 'Stockout')}
-</span>
+        <span
+          className={`lg:text-xl italic ${
+            productDetail.quantity === 0 && " text-red-500"
+          }`}
+        >
+          {productDetail.quantity !== 0
+            ? formatVND(productDetail.price)
+            : isLanguageVN
+            ? "Hết hàng"
+            : "Stockout"}
+        </span>
       </div>
     </Card>
   );

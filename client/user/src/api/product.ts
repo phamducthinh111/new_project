@@ -30,10 +30,10 @@ export const getSearchSuggestions = async (name: string, delFlag?: boolean) => {
   return response.data;
 };
 
-// export const getProductDentail = async (productId: number) => {
-//     const response = await http.get(`product/${productId}`);
-//     return response.data;
-// }
+export const getProductDentail = async (productId: number) => {
+    const response = await http.get(`product/${productId}`);
+    return response.data;
+}
 
 // export const createProduct = async (req: ProductContent) => {
 //   const response = await http.post("product", { body: req });

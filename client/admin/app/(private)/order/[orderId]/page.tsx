@@ -267,6 +267,10 @@ export default function ProductDetailPage({ params }: any) {
                       "HH:mm - DD/MM/YYYY"
                     )}
                   </Descriptions.Item>
+                  {orderDentail.note &&
+                   <Descriptions.Item label="Note" span={3}>
+                   {orderDentail.note}
+                 </Descriptions.Item>}
                 </Descriptions>
               </Card>
             </Col>
