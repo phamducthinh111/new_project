@@ -33,7 +33,7 @@ const ProductList = () => {
       <Row gutter={[16, 16]} justify="center">
         {productsData.map((product, index) => (
           <Col
-            xs={24}
+            xs={12}
             sm={12}
             md={12}
             lg={8}

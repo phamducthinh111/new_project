@@ -1,4 +1,3 @@
-// components/LanguageButton.tsx
 import React from 'react';
 import { Button } from 'antd';
 import { useAppDispatch, useAppSelector } from '@/store/store';
@@ -21,7 +20,7 @@ const LanguageButton: React.FC<LanguageButtonProps> = ({ language, className }) 
   return (
     <StyledButtonLanguage
       type="link"
-      className={`m-2 ${className} ${language === activeLanguage ? 'text-[#B9913B]' : 'text-gray-500'}`}
+      className={`${className} ${language === activeLanguage ? 'text-[#B9913B]' : 'text-gray-500'} font-medium`}
       onClick={handleClick}
     >
       {language.toUpperCase()}

@@ -20,6 +20,9 @@ export class Order extends Model {
   @Column({ name: 'description', nullable: true })
   desc?: string;
 
+  @Column({ name: 'note', nullable: true })
+  note?: string;
+
   @ManyToOne(() => User, (user) => user.orders)
   user: User;
 
